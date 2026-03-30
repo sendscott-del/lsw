@@ -1,4 +1,4 @@
-export const APP_VERSION = '1.2.0'
+export const APP_VERSION = '1.3.0'
 
 export interface ChangelogEntry {
   version: string
@@ -8,6 +8,16 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '1.3.0',
+    date: '2026-03-30',
+    enhancements: [
+      'Cell comments now work on desktop — hold click for 500ms or right-click to open the comment dialog',
+    ],
+    bugFixes: [
+      'Fixed long-press not working with mouse/keyboard (only worked on touchscreens)',
+    ],
+  },
   {
     version: '1.2.0',
     date: '2026-03-30',

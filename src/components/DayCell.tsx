@@ -7,7 +7,7 @@ interface DayCellProps {
   value: EntryValue | null
   hasComment: boolean
   isToday: boolean
-  isApplicable: boolean // whether this day applies based on frequency
+  isApplicable: boolean
   onTap: () => void
   onLongPress: () => void
 }
@@ -25,8 +25,11 @@ const VALUE_LABELS: Record<string, string> = {
 export default function DayCell({ value, hasComment, isToday, isApplicable, onTap, onLongPress }: DayCellProps) {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isLongPress = useRef(false)
+  const isTouchDevice = useRef(false)
 
+  // Touch handlers (mobile)
   const handleTouchStart = useCallback(() => {
+    isTouchDevice.current = true
     isLongPress.current = false
     timerRef.current = setTimeout(() => {
       isLongPress.current = true
@@ -46,7 +49,31 @@ export default function DayCell({ value, hasComment, isToday, isApplicable, onTa
     if (timerRef.current) clearTimeout(timerRef.current)
   }, [])
 
-  // Non-applicable days are dimmed
+  // Mouse handlers (desktop) — long-press with mouse
+  const handleMouseDown = useCallback(() => {
+    if (isTouchDevice.current) return // skip if touch already handled
+    isLongPress.current = false
+    timerRef.current = setTimeout(() => {
+      isLongPress.current = true
+      onLongPress()
+    }, 500)
+  }, [onLongPress])
+
+  const handleMouseUp = useCallback(() => {
+    if (isTouchDevice.current) {
+      isTouchDevice.current = false
+      return
+    }
+    if (timerRef.current) clearTimeout(timerRef.current)
+    if (!isLongPress.current) {
+      onTap()
+    }
+  }, [onTap])
+
+  const handleMouseLeave = useCallback(() => {
+    if (timerRef.current) clearTimeout(timerRef.current)
+  }, [])
+
   if (!isApplicable) {
     return (
       <div className="cell-tap flex items-center justify-center w-10 h-10 min-w-[2.5rem] rounded text-xs text-gray-300 bg-gray-50/50">
@@ -60,10 +87,15 @@ export default function DayCell({ value, hasComment, isToday, isApplicable, onTa
   return (
     <div
       className={`cell-tap relative flex items-center justify-center w-10 h-10 min-w-[2.5rem] rounded border text-xs font-bold select-none cursor-pointer ${bgStyle}`}
+      // Touch (mobile)
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       onTouchMove={handleTouchMove}
-      onClick={onTap}
+      // Mouse (desktop) — click handled via mousedown/mouseup, long-press = hold 500ms
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseLeave}
+      // Right-click also opens comment
       onContextMenu={e => { e.preventDefault(); onLongPress() }}
     >
       {value && VALUE_LABELS[value]}

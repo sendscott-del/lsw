@@ -40,7 +40,7 @@ export default function GuidePage() {
           <p>The main tracking grid shows your behaviors organized by category with 7 day columns (Sun-Sat).</p>
           <ul className="list-disc list-inside space-y-1 mt-2">
             <li><strong>Tap a cell</strong> — Cycles through: empty, Y (green), N (red), back to empty</li>
-            <li><strong>Long-press a cell</strong> — Opens the comment dialog to add a reflection note</li>
+            <li><strong>Long-press a cell</strong> (or right-click on desktop) — Opens the comment dialog to add a reflection note</li>
             <li><strong>Dimmed cells (—)</strong> — Days that don&apos;t apply based on your frequency setting</li>
             <li><strong>Blue dot</strong> — Indicates a cell has a comment attached</li>
             <li><strong>Completion bar</strong> — Shows your completion % for the week (only counts applicable days)</li>
