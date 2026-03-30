@@ -1,4 +1,4 @@
-export const APP_VERSION = '1.3.0'
+export const APP_VERSION = '1.4.0'
 
 export interface ChangelogEntry {
   version: string
@@ -8,6 +8,18 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '1.4.0',
+    date: '2026-03-30',
+    enhancements: [
+      'Templates — admins can create reusable sets of categories and behaviors, then share them with user groups',
+      'User Groups — create named groups and add users by email for template distribution',
+      'Template Assignments — assign templates to groups; they auto-populate into each member\'s Work tab on login',
+      'Admin panel accessible from the header menu (admin users only)',
+      'Admin designation via lsw_admins table',
+    ],
+    bugFixes: [],
+  },
   {
     version: '1.3.0',
     date: '2026-03-30',

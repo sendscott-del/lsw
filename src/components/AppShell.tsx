@@ -14,7 +14,7 @@ interface AppShellProps {
 }
 
 export default function AppShell({ children, activeTab, onTabChange }: AppShellProps) {
-  const { user, loading, signOut } = useAuth()
+  const { user, loading, isAdmin, signOut } = useAuth()
   const router = useRouter()
   const [showMenu, setShowMenu] = useState(false)
 
@@ -50,6 +50,17 @@ export default function AppShell({ children, activeTab, onTabChange }: AppShellP
             <>
               <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
               <div className="absolute right-0 top-full mt-1 z-50 bg-white border border-gray-200 rounded-lg shadow-lg py-1 w-44">
+                {isAdmin && (
+                  <>
+                    <button
+                      onClick={() => { router.push('/admin'); setShowMenu(false) }}
+                      className="w-full px-4 py-2 text-left text-sm text-blue-600 font-medium hover:bg-blue-50"
+                    >
+                      Admin
+                    </button>
+                    <div className="border-t border-gray-100 my-1" />
+                  </>
+                )}
                 <button
                   onClick={() => { router.push('/guide'); setShowMenu(false) }}
                   className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"

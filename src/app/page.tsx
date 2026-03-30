@@ -3,6 +3,7 @@
 import { useState, useMemo, useCallback } from 'react'
 import { Plus } from 'lucide-react'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { useTemplateSync } from '@/lib/hooks/useTemplateSync'
 import { useLswData, calculateCompletion } from '@/lib/hooks/useLswData'
 import {
   getWeekStart, getWeekDates, nextWeek, prevWeek,
@@ -30,6 +31,7 @@ import type { EntryValue } from '@/lib/types'
 
 export default function HomePage() {
   const { user } = useAuth()
+  useTemplateSync(user?.id)
   const [activeTab, setActiveTab] = useState<TabId>('work')
   const [viewMode, setViewMode] = useState<ViewMode>('weekly')
 

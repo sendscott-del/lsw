@@ -7,6 +7,7 @@ import type { User } from '@supabase/supabase-js'
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isAdmin, setIsAdmin] = useState(false)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -22,9 +23,25 @@ export function useAuth() {
     return () => subscription.unsubscribe()
   }, [])
 
+  // Check admin status when user changes
+  useEffect(() => {
+    if (!user) {
+      setIsAdmin(false)
+      return
+    }
+    supabase
+      .from('lsw_admins')
+      .select('user_id')
+      .eq('user_id', user.id)
+      .single()
+      .then(({ data }) => {
+        setIsAdmin(!!data)
+      })
+  }, [user])
+
   const signOut = async () => {
     await supabase.auth.signOut()
   }
 
-  return { user, loading, signOut }
+  return { user, loading, isAdmin, signOut }
 }

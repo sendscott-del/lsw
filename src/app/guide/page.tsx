@@ -99,6 +99,18 @@ export default function GuidePage() {
           </ul>
         </Section>
 
+        <Section title="Templates &amp; Groups (Admin)">
+          <p>Admins can create reusable LSW templates and share them with user groups.</p>
+          <ul className="list-disc list-inside space-y-1 mt-2">
+            <li><strong>Templates</strong> — A saved set of categories and behaviors. Create them in Admin &gt; Templates</li>
+            <li><strong>User Groups</strong> — Named groups of users (e.g., &quot;Bishopric&quot;, &quot;EQ Presidency&quot;). Add members by email</li>
+            <li><strong>Assignments</strong> — Assign a template to a group. When group members log in, the template&apos;s categories and behaviors auto-populate into their Work tab</li>
+            <li><strong>Customization</strong> — Once a template is applied, users own their copy and can freely modify, add, or remove items</li>
+            <li><strong>One-time apply</strong> — Each template is only applied once per user. Re-assigning the same template won&apos;t duplicate items</li>
+          </ul>
+          <p className="mt-2 text-xs text-gray-500">To become an admin, add your user ID to the lsw_admins table in Supabase.</p>
+        </Section>
+
         <Section title="Tips for Effective LSW">
           <ul className="list-disc list-inside space-y-1">
             <li>Review your LSW first thing each day — plan which behaviors to focus on</li>

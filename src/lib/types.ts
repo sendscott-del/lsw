@@ -48,3 +48,56 @@ export interface Note {
   content: string
   updated_at: string
 }
+
+// Templates & Groups
+
+export interface UserGroup {
+  id: string
+  name: string
+  created_by: string
+  created_at: string
+}
+
+export interface GroupMember {
+  id: string
+  group_id: string
+  user_id: string
+}
+
+export interface Template {
+  id: string
+  name: string
+  created_by: string
+  created_at: string
+  updated_at: string
+}
+
+export interface TemplateCategory {
+  id: string
+  template_id: string
+  name: string
+  sort_order: number
+}
+
+export interface TemplateBehavior {
+  id: string
+  category_id: string
+  name: string
+  frequency: Frequency
+  days_of_week: number[] | null
+  monthly_pattern: MonthlyPattern | null
+  sort_order: number
+}
+
+export interface TemplateAssignment {
+  id: string
+  template_id: string
+  group_id: string
+}
+
+export interface TemplateApplied {
+  id: string
+  template_id: string
+  user_id: string
+  applied_at: string
+}
