@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+:root {
+  --color-y: #22c55e;
+  --color-n: #ef4444;
+  --color-k: #f59e0b;
+  --color-empty: #f3f4f6;
+  --color-today: #dbeafe;
+}
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #ffffff;
+  color: #111827;
+}
+
+/* Prevent text selection on grid cells for mobile */
+.cell-tap {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
