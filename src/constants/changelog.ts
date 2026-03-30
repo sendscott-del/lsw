@@ -1,4 +1,4 @@
-export const APP_VERSION = '1.1.0'
+export const APP_VERSION = '1.2.0'
 
 export interface ChangelogEntry {
   version: string
@@ -8,6 +8,17 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '1.2.0',
+    date: '2026-03-30',
+    enhancements: [
+      'Daily view — single-day focus with large Y/N toggles and comment previews, ideal for heavy days like Sunday',
+      'Monthly view — compact heat-map grid showing the entire month at a glance with color-coded cells',
+      'View switcher (Day/Week/Month) at top of navigation — dates sync when switching between views',
+      'Updated user guide with new view mode documentation',
+    ],
+    bugFixes: [],
+  },
   {
     version: '1.1.0',
     date: '2026-03-30',

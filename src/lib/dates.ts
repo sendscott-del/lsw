@@ -1,4 +1,4 @@
-import { startOfWeek, addDays, addWeeks, subWeeks, format, isSameDay, getDate, getDay } from 'date-fns'
+import { startOfWeek, startOfMonth, endOfMonth, addDays, subDays, addWeeks, subWeeks, addMonths, subMonths, format, isSameDay, getDate, getDay } from 'date-fns'
 import type { MonthlyPattern } from '@/lib/types'
 
 // Get the Sunday that starts the week containing a given date
@@ -76,6 +76,44 @@ export function formatWeekRange(dates: Date[]): string {
 
 export function isToday(date: Date): boolean {
   return isSameDay(date, new Date())
+}
+
+// Daily view helpers
+export function nextDay(date: Date): Date {
+  return addDays(date, 1)
+}
+
+export function prevDay(date: Date): Date {
+  return subDays(date, 1)
+}
+
+export function formatDayFull(date: Date): string {
+  return format(date, 'EEEE, MMM d, yyyy')
+}
+
+// Monthly view helpers
+export function getMonthDates(year: number, month: number): Date[] {
+  const start = startOfMonth(new Date(year, month))
+  const end = endOfMonth(start)
+  const dates: Date[] = []
+  let current = start
+  while (current <= end) {
+    dates.push(current)
+    current = addDays(current, 1)
+  }
+  return dates
+}
+
+export function nextMonth(date: Date): Date {
+  return addMonths(date, 1)
+}
+
+export function prevMonth(date: Date): Date {
+  return subMonths(date, 1)
+}
+
+export function formatMonthLabel(date: Date): string {
+  return format(date, 'MMMM yyyy')
 }
 
 // Check if a specific date matches a recurrence pattern

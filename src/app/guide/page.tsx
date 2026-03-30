@@ -47,9 +47,19 @@ export default function GuidePage() {
           </ul>
         </Section>
 
-        <Section title="Week Navigation">
-          <p>Use the left/right arrows to move between weeks. Navigation is seamless — going past the last week of a month automatically moves to the next month.</p>
-          <p className="mt-1">Tap the calendar icon to jump back to the current week.</p>
+        <Section title="View Modes">
+          <p>Switch between three views using the Day/Week/Month buttons at the top:</p>
+          <ul className="list-disc list-inside space-y-1 mt-2">
+            <li><strong>Day view</strong> — Shows a single day with all behaviors listed vertically. Each behavior has a large Y/N toggle and shows any comment. Great for days with many tasks (like Sunday)</li>
+            <li><strong>Week view</strong> — The default 7-day grid. Behaviors as rows, days as columns. Best for overall weekly tracking</li>
+            <li><strong>Month view</strong> — Compact heat-map grid showing the entire month. Color-coded cells (green=Y, red=N) let you spot patterns at a glance</li>
+          </ul>
+          <p className="mt-2">Dates stay synced when switching views — if you&apos;re looking at Wednesday in Day view, switching to Week view shows that week.</p>
+        </Section>
+
+        <Section title="Navigation">
+          <p>Use the left/right arrows to move between days, weeks, or months depending on your current view. Navigation is seamless — going past the last week of a month automatically moves to the next month.</p>
+          <p className="mt-1">Tap the calendar icon to jump back to today.</p>
         </Section>
 
         <Section title="Frequency Options">
