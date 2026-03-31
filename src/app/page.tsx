@@ -4,12 +4,9 @@ import { useState, useMemo, useCallback } from 'react'
 import { Plus } from 'lucide-react'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useTemplateSync } from '@/lib/hooks/useTemplateSync'
-import { useLswData, calculateCompletion } from '@/lib/hooks/useLswData'
-import { getWeekStart, getWeekDates, nextWeek, prevWeek, formatDate } from '@/lib/dates'
+import { useLswData } from '@/lib/hooks/useLswData'
 import AppShell from '@/components/AppShell'
 import type { TabId } from '@/components/AppShell'
-import WeekNavigation from '@/components/WeekNavigation'
-import CompletionBar from '@/components/CompletionBar'
 import CategorySection from '@/components/CategorySection'
 import NotesTab from '@/components/NotesTab'
 import ReflectionLog from '@/components/ReflectionLog'
@@ -26,13 +23,8 @@ export default function HomePage() {
   useTemplateSync(user?.id)
   const [activeTab, setActiveTab] = useState<TabId>('work')
 
-  // Week navigation
-  const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()))
-  const weekDates = useMemo(() => getWeekDates(weekStart), [weekStart])
-
-  // Data
   const { categories, behaviors, archivedBehaviors, entries, comments, complianceMap, loading, refresh, upsertEntry, upsertComment } =
-    useLswData(user?.id, weekDates)
+    useLswData(user?.id)
 
   // Modal state
   const [cellDetailModal, setCellDetailModal] = useState<{
@@ -42,12 +34,6 @@ export default function HomePage() {
   const [addBehaviorCategoryId, setAddBehaviorCategoryId] = useState<string | null>(null)
   const [editBehaviorId, setEditBehaviorId] = useState<string | null>(null)
   const [editCategoryId, setEditCategoryId] = useState<string | null>(null)
-
-  // Weekly completion %
-  const completionPercentage = useMemo(
-    () => calculateCompletion(behaviors, entries, weekDates),
-    [behaviors, entries, weekDates]
-  )
 
   const handleCellTap = useCallback(
     (behaviorId: string, date: string, currentValue: EntryValue | null) => {
@@ -78,7 +64,6 @@ export default function HomePage() {
     [cellDetailModal, entries, upsertEntry, upsertComment]
   )
 
-  // Group behaviors by category
   const behaviorsByCategory = useMemo(() => {
     const map = new Map<string, typeof behaviors>()
     for (const cat of categories) map.set(cat.id, [])
@@ -102,16 +87,6 @@ export default function HomePage() {
     <AppShell activeTab={activeTab} onTabChange={setActiveTab}>
       {activeTab === 'work' && (
         <div>
-          <WeekNavigation
-            weekStart={weekStart}
-            weekDates={weekDates}
-            onPrevWeek={() => setWeekStart(prev => prevWeek(prev))}
-            onNextWeek={() => setWeekStart(prev => nextWeek(prev))}
-            onToday={() => setWeekStart(getWeekStart(new Date()))}
-          />
-
-          <CompletionBar percentage={completionPercentage} />
-
           {loading ? (
             <div className="flex items-center justify-center h-48 text-sm text-gray-400">Loading...</div>
           ) : (
@@ -122,7 +97,6 @@ export default function HomePage() {
                   category={category}
                   behaviors={behaviorsByCategory.get(category.id) ?? []}
                   archivedBehaviors={archivedByCategory.get(category.id) ?? []}
-                  weekDates={weekDates}
                   entries={entries}
                   comments={comments}
                   complianceMap={complianceMap}
@@ -131,6 +105,7 @@ export default function HomePage() {
                   onAddBehavior={catId => setAddBehaviorCategoryId(catId)}
                   onEditBehavior={behId => setEditBehaviorId(behId)}
                   onEditCategory={catId => setEditCategoryId(catId)}
+                  onRefresh={refresh}
                 />
               ))}
 
@@ -157,7 +132,6 @@ export default function HomePage() {
       {activeTab === 'reflect' && user && <ReflectionLog userId={user.id} />}
       {activeTab === 'notes' && user && <NotesTab userId={user.id} />}
 
-      {/* Modals */}
       {cellDetailModal && (
         <CellDetailModal
           behaviorName={cellDetailModal.behaviorName}

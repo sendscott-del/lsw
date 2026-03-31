@@ -1,32 +1,47 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronDown, ChevronRight, Plus, Pencil, Archive } from 'lucide-react'
+import { ChevronDown, ChevronRight, Plus, Pencil, Archive, ArrowUpDown } from 'lucide-react'
 import BehaviorRow from './BehaviorRow'
 import type { Category, Behavior, Entry, CellComment, EntryValue } from '@/lib/types'
-import { formatDayHeader, isToday as checkIsToday } from '@/lib/dates'
+import { supabase } from '@/lib/supabase'
 
 interface CategorySectionProps {
   category: Category
   behaviors: Behavior[]
   archivedBehaviors: Behavior[]
-  weekDates: Date[]
   entries: Map<string, Entry>
   comments: Map<string, CellComment>
-  complianceMap: Map<string, number | null> // behaviorId -> 4-week %
+  complianceMap: Map<string, number | null>
   onCellTap: (behaviorId: string, date: string, currentValue: EntryValue | null) => void
   onCellLongPress: (behaviorId: string, date: string) => void
   onAddBehavior: (categoryId: string) => void
   onEditBehavior: (behaviorId: string) => void
   onEditCategory: (categoryId: string) => void
+  onRefresh: () => void
 }
 
 export default function CategorySection({
-  category, behaviors, archivedBehaviors, weekDates, entries, comments, complianceMap,
-  onCellTap, onCellLongPress, onAddBehavior, onEditBehavior, onEditCategory,
+  category, behaviors, archivedBehaviors, entries, comments, complianceMap,
+  onCellTap, onCellLongPress, onAddBehavior, onEditBehavior, onEditCategory, onRefresh,
 }: CategorySectionProps) {
   const [collapsed, setCollapsed] = useState(false)
   const [showArchived, setShowArchived] = useState(false)
+  const [reorderMode, setReorderMode] = useState(false)
+
+  async function handleMove(index: number, direction: -1 | 1) {
+    const swapIndex = index + direction
+    if (swapIndex < 0 || swapIndex >= behaviors.length) return
+
+    const a = behaviors[index]
+    const b = behaviors[swapIndex]
+
+    await Promise.all([
+      supabase.from('lsw_behaviors').update({ sort_order: b.sort_order }).eq('id', a.id),
+      supabase.from('lsw_behaviors').update({ sort_order: a.sort_order }).eq('id', b.id),
+    ])
+    onRefresh()
+  }
 
   return (
     <div className="mb-2">
@@ -36,6 +51,13 @@ export default function CategorySection({
           {collapsed ? <ChevronRight size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}
           <span className="text-sm font-semibold text-gray-700 truncate">{category.name}</span>
           <span className="text-xs text-gray-400 ml-1">({behaviors.length})</span>
+        </button>
+        <button
+          onClick={() => setReorderMode(!reorderMode)}
+          className={`p-1 mr-1 rounded ${reorderMode ? 'text-blue-600 bg-blue-50' : 'text-gray-400 hover:text-gray-600'}`}
+          title="Reorder behaviors"
+        >
+          <ArrowUpDown size={14} />
         </button>
         <button onClick={() => onEditCategory(category.id)} className="p-1 text-gray-400 hover:text-gray-600 mr-1" title="Edit category">
           <Pencil size={14} />
@@ -49,52 +71,37 @@ export default function CategorySection({
         <div className="overflow-x-auto">
           {/* Column headers */}
           <div className="flex items-stretch">
-            {/* Edit col */}
             <div className="sticky left-0 z-10 bg-white w-9 min-w-[2.25rem] border-r border-gray-100" />
-            {/* Task col */}
             <div className="sticky left-9 z-10 bg-white min-w-[100px] max-w-[100px] border-r border-gray-100 px-2 py-1">
               <span className="text-[9px] text-gray-400 font-medium">TASK</span>
             </div>
-            {/* Freq col */}
             <div className="sticky left-[136px] z-10 bg-white w-24 min-w-[6rem] border-r border-gray-100 px-1.5 py-1">
               <span className="text-[9px] text-gray-400 font-medium">FREQUENCY</span>
             </div>
-            {/* % col */}
             <div className="sticky left-[232px] z-10 bg-white w-10 min-w-[2.5rem] border-r border-gray-100 flex items-center justify-center py-1">
               <span className="text-[9px] text-gray-400 font-medium">4W%</span>
             </div>
-            {/* Day headers */}
-            <div className="flex items-center gap-1 px-1 py-1">
-              {weekDates.map(date => {
-                const { letter, number } = formatDayHeader(date)
-                const today = checkIsToday(date)
-                return (
-                  <div
-                    key={date.toISOString()}
-                    className={`flex flex-col items-center justify-center w-10 min-w-[2.5rem] text-[10px] ${
-                      today ? 'text-blue-600 font-bold' : 'text-gray-400'
-                    }`}
-                  >
-                    <span>{letter}</span>
-                    <span>{number}</span>
-                  </div>
-                )
-              })}
+            <div className="px-1 py-1">
+              <span className="text-[9px] text-gray-400 font-medium">NEXT OCCURRENCES</span>
             </div>
           </div>
 
           {/* Active behavior rows */}
-          {behaviors.map(behavior => (
+          {behaviors.map((behavior, index) => (
             <BehaviorRow
               key={behavior.id}
               behavior={behavior}
-              weekDates={weekDates}
               entries={entries}
               comments={comments}
               compliancePercent={complianceMap.get(behavior.id) ?? null}
               onCellTap={onCellTap}
               onCellLongPress={onCellLongPress}
               onEditBehavior={onEditBehavior}
+              reorderMode={reorderMode}
+              onMoveUp={() => handleMove(index, -1)}
+              onMoveDown={() => handleMove(index, 1)}
+              isFirst={index === 0}
+              isLast={index === behaviors.length - 1}
             />
           ))}
 
@@ -105,7 +112,6 @@ export default function CategorySection({
             </div>
           )}
 
-          {/* Archived toggle */}
           {archivedBehaviors.length > 0 && (
             <div className="px-3 py-2">
               <button onClick={() => setShowArchived(!showArchived)} className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600">
@@ -118,13 +124,13 @@ export default function CategorySection({
                     <BehaviorRow
                       key={behavior.id}
                       behavior={behavior}
-                      weekDates={weekDates}
                       entries={entries}
                       comments={comments}
                       compliancePercent={null}
                       onCellTap={onCellTap}
                       onCellLongPress={onCellLongPress}
                       onEditBehavior={onEditBehavior}
+                      reorderMode={false}
                     />
                   ))}
                 </div>

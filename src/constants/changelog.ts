@@ -1,4 +1,4 @@
-export const APP_VERSION = '1.5.0'
+export const APP_VERSION = '1.6.0'
 
 export interface ChangelogEntry {
   version: string
@@ -8,6 +8,16 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '1.6.0',
+    date: '2026-03-30',
+    enhancements: [
+      'Next-4-occurrences grid — each behavior row shows its own next 4 applicable dates with day letter + date headers, adapting to frequency',
+      'Behavior reorder — tap the reorder icon on a category header to enable up/down arrows for rearranging behaviors',
+      'Removed fixed 7-day weekly grid — the grid is now frequency-aware per row',
+    ],
+    bugFixes: [],
+  },
   {
     version: '1.5.0',
     date: '2026-03-30',

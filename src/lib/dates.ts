@@ -1,4 +1,4 @@
-import { startOfWeek, addDays, addWeeks, subWeeks, format, isSameDay, getDate, getDay } from 'date-fns'
+import { startOfWeek, addDays, addWeeks, subWeeks, addMonths, format, isSameDay, getDate, getDay } from 'date-fns'
 import type { MonthlyPattern, RepeatUnit } from '@/lib/types'
 
 export function getWeekStart(date: Date): Date {
@@ -142,4 +142,103 @@ export function formatFrequency(
   }
 
   return ''
+}
+
+// Get the next N occurrences of a behavior starting from a given date
+export function getNextOccurrences(
+  fromDate: Date,
+  count: number,
+  repeatUnit: RepeatUnit,
+  repeatInterval: number,
+  daysOfWeek?: number[] | null,
+  monthlyPattern?: MonthlyPattern | null
+): Date[] {
+  const results: Date[] = []
+  const maxSearch = 365 // safety limit
+
+  if (repeatUnit === 'day') {
+    // Every N days from today
+    let d = fromDate
+    for (let i = 0; i < count; i++) {
+      results.push(d)
+      d = addDays(d, repeatInterval)
+    }
+    return results
+  }
+
+  if (repeatUnit === 'week') {
+    const days = daysOfWeek && daysOfWeek.length > 0 ? daysOfWeek : [0, 1, 2, 3, 4, 5, 6]
+    let d = fromDate
+    let searched = 0
+    while (results.length < count && searched < maxSearch) {
+      if (days.includes(getDay(d))) {
+        results.push(d)
+      }
+      d = addDays(d, 1)
+      searched++
+      // For intervals > 1 week, skip ahead after completing a week's worth of applicable days
+      // Simple approach: check every day but only within applicable week cycles
+    }
+    // If interval > 1, filter to only keep every Nth week's occurrences
+    if (repeatInterval > 1 && results.length > 0) {
+      const firstWeekStart = getWeekStart(results[0])
+      return results.filter(date => {
+        const weekStart = getWeekStart(date)
+        const weeksDiff = Math.round((weekStart.getTime() - firstWeekStart.getTime()) / (7 * 24 * 60 * 60 * 1000))
+        return weeksDiff % repeatInterval === 0
+      }).slice(0, count)
+    }
+    return results
+  }
+
+  if (repeatUnit === 'month') {
+    let monthDate = new Date(fromDate.getFullYear(), fromDate.getMonth(), 1)
+    let searched = 0
+
+    while (results.length < count && searched < 48) { // 48 months max
+      const daysInMonth = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0).getDate()
+
+      if (monthlyPattern?.type === 'day_of_month' && monthlyPattern.day != null) {
+        const targetDay = Math.min(monthlyPattern.day, daysInMonth)
+        const candidate = new Date(monthDate.getFullYear(), monthDate.getMonth(), targetDay)
+        if (candidate >= fromDate) {
+          results.push(candidate)
+        }
+      } else if (monthlyPattern?.type === 'nth_weekday' && monthlyPattern.nth != null && monthlyPattern.weekday != null) {
+        // Find the nth weekday in this month
+        let dayCount = 0
+        for (let d = 1; d <= daysInMonth; d++) {
+          const date = new Date(monthDate.getFullYear(), monthDate.getMonth(), d)
+          if (getDay(date) === monthlyPattern.weekday) {
+            dayCount++
+            if (dayCount === monthlyPattern.nth || (monthlyPattern.nth === 5 && d + 7 > daysInMonth)) {
+              if (date >= fromDate) {
+                results.push(date)
+              }
+              break
+            }
+          }
+        }
+      } else {
+        // No pattern specified, use first of month
+        const candidate = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1)
+        if (candidate >= fromDate) results.push(candidate)
+      }
+
+      monthDate = addMonths(monthDate, repeatInterval)
+      searched++
+    }
+    return results.slice(0, count)
+  }
+
+  return results
+}
+
+// Format a date for the occurrence cell header
+export function formatOccurrenceHeader(date: Date): { dayLetter: string; dateLabel: string } {
+  const letters = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
+  return {
+    dayLetter: letters[getDay(date)],
+    dateLabel: format(date, 'MMM d'),
+  }
 }
