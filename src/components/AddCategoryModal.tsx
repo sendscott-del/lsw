@@ -20,7 +20,7 @@ export default function AddCategoryModal({ userId, existingCount, onSuccess, onC
     if (!name.trim()) return
     setLoading(true)
 
-    await supabase.from('lsw_categories').insert({
+    await supabase.from('steward_categories').insert({
       user_id: userId,
       name: name.trim(),
       sort_order: existingCount,

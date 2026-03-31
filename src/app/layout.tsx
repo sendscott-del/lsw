@@ -2,8 +2,8 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Leader Standard Work',
-  description: 'Track and manage your leader standard work behaviors',
+  title: 'Steward',
+  description: 'Track and manage your stewardship behaviors and accountability',
 }
 
 export const viewport: Viewport = {

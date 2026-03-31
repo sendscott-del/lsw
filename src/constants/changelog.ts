@@ -1,4 +1,4 @@
-export const APP_VERSION = '1.9.0'
+export const APP_VERSION = '2.0.0'
 
 export interface ChangelogEntry {
   version: string
@@ -8,6 +8,21 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.0.0',
+    date: '2026-03-31',
+    enhancements: [
+      'Renamed app from "Leader Standard Work" to "Steward"',
+      'All database tables renamed from lsw_ to steward_ prefix',
+      'Updated all UI text, page titles, guide, and login screen',
+      'Save as Template from the main Work tab (admin only)',
+      'Simplified admin panel — templates created from main page, admin manages groups and assignments',
+    ],
+    bugFixes: [
+      'Fixed admin page redirect loop',
+      'Fixed quarterly/monthly scroll jumping too far',
+    ],
+  },
   {
     version: '1.9.0',
     date: '2026-03-30',
@@ -73,7 +88,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       'User Groups — create named groups and add users by email for template distribution',
       'Template Assignments — assign templates to groups; they auto-populate into each member\'s Work tab on login',
       'Admin panel accessible from the header menu (admin users only)',
-      'Admin designation via lsw_admins table',
+      'Admin designation via steward_admins table',
     ],
     bugFixes: [],
   },
@@ -125,7 +140,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     version: '1.0.0',
     date: '2026-03-30',
     enhancements: [
-      'Initial release of Leader Standard Work app',
+      'Initial release of Steward app',
       'User authentication (email/password)',
       'Category and behavior management',
       '7-day weekly tracking grid with y/n values',

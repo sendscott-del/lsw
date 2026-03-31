@@ -41,7 +41,7 @@ export function useAuth() {
     setAdminLoading(true)
 
     supabase
-      .from('lsw_admins')
+      .from('steward_admins')
       .select('user_id')
       .eq('user_id', uid)
       .then(({ data, error }) => {

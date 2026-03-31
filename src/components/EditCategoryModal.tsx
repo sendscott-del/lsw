@@ -22,7 +22,7 @@ export default function EditCategoryModal({ category, onSuccess, onClose }: Edit
     setLoading(true)
 
     await supabase
-      .from('lsw_categories')
+      .from('steward_categories')
       .update({ name: name.trim(), updated_at: new Date().toISOString() })
       .eq('id', category.id)
 
@@ -38,7 +38,7 @@ export default function EditCategoryModal({ category, onSuccess, onClose }: Edit
     }
     setLoading(true)
     // Deleting a category cascades to its behaviors (and their entries/comments)
-    await supabase.from('lsw_categories').delete().eq('id', category.id)
+    await supabase.from('steward_categories').delete().eq('id', category.id)
     setLoading(false)
     onSuccess()
     onClose()

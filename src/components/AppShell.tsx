@@ -38,7 +38,7 @@ export default function AppShell({ children, activeTab, onTabChange }: AppShellP
     <div className="min-h-screen flex flex-col pb-16">
       {/* Header */}
       <header className="sticky top-0 z-30 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-        <h1 className="text-lg font-bold text-gray-900">Leader Standard Work</h1>
+        <h1 className="text-lg font-bold text-gray-900">Steward</h1>
         <div className="relative">
           <button
             onClick={() => setShowMenu(!showMenu)}

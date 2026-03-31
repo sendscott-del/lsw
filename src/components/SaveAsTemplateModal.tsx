@@ -27,7 +27,7 @@ export default function SaveAsTemplateModal({
 
     // Create the template
     const { data: template, error: tErr } = await supabase
-      .from('lsw_templates')
+      .from('steward_templates')
       .insert({ name: name.trim(), created_by: userId })
       .select('id')
       .single()
@@ -41,7 +41,7 @@ export default function SaveAsTemplateModal({
     // Copy categories
     for (const cat of categories) {
       const { data: newCat } = await supabase
-        .from('lsw_template_categories')
+        .from('steward_template_categories')
         .insert({ template_id: template.id, name: cat.name, sort_order: cat.sort_order })
         .select('id')
         .single()
@@ -51,7 +51,7 @@ export default function SaveAsTemplateModal({
       // Copy behaviors for this category
       const catBehaviors = behaviors.filter(b => b.category_id === cat.id && !b.is_archived)
       if (catBehaviors.length > 0) {
-        await supabase.from('lsw_template_behaviors').insert(
+        await supabase.from('steward_template_behaviors').insert(
           catBehaviors.map(b => ({
             category_id: newCat.id,
             name: b.name,
@@ -81,7 +81,7 @@ export default function SaveAsTemplateModal({
         </div>
 
         <p className="text-sm text-gray-500 mb-4">
-          This will save a copy of your current LSW ({categories.length} categories, {totalBehaviors} behaviors) as a reusable template that you can share with user groups.
+          This will save a copy of your current Steward ({categories.length} categories, {totalBehaviors} behaviors) as a reusable template that you can share with user groups.
         </p>
 
         <div className="mb-4">
@@ -94,7 +94,7 @@ export default function SaveAsTemplateModal({
             value={name}
             onChange={e => setName(e.target.value)}
             autoFocus
-            placeholder="e.g., Bishop LSW, EQ Presidency LSW"
+            placeholder="e.g., Bishop Steward, EQ Presidency Steward"
             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>

@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { formatDate, getPeriodCells, getDefaultCount, getLast12Dates } from '@/lib/dates'
 import type { Category, Behavior, Entry, CellComment, EntryValue } from '@/lib/types'
 
-interface LswData {
+interface StewardData {
   categories: Category[]
   behaviors: Behavior[]
   archivedBehaviors: Behavior[]
@@ -22,7 +22,7 @@ function entryKey(behaviorId: string, date: string): string {
   return `${behaviorId}_${date}`
 }
 
-export function useLswData(userId: string | undefined): LswData {
+export function useStewardData(userId: string | undefined): StewardData {
   const [categories, setCategories] = useState<Category[]>([])
   const [behaviors, setBehaviors] = useState<Behavior[]>([])
   const [archivedBehaviors, setArchivedBehaviors] = useState<Behavior[]>([])
@@ -35,9 +35,9 @@ export function useLswData(userId: string | undefined): LswData {
     setLoading(true)
 
     const [catRes, activeBehRes, archivedBehRes] = await Promise.all([
-      supabase.from('lsw_categories').select('*').eq('user_id', userId).order('sort_order'),
-      supabase.from('lsw_behaviors').select('*').eq('user_id', userId).eq('is_archived', false).order('sort_order'),
-      supabase.from('lsw_behaviors').select('*').eq('user_id', userId).eq('is_archived', true).order('sort_order'),
+      supabase.from('steward_categories').select('*').eq('user_id', userId).order('sort_order'),
+      supabase.from('steward_behaviors').select('*').eq('user_id', userId).eq('is_archived', false).order('sort_order'),
+      supabase.from('steward_behaviors').select('*').eq('user_id', userId).eq('is_archived', true).order('sort_order'),
     ])
 
     const cats = (catRes.data ?? []) as Category[]
@@ -61,10 +61,10 @@ export function useLswData(userId: string | undefined): LswData {
 
     const [entRes, comRes] = await Promise.all([
       allDateStrings.length > 0
-        ? supabase.from('lsw_entries').select('*').eq('user_id', userId).in('entry_date', allDateStrings)
+        ? supabase.from('steward_entries').select('*').eq('user_id', userId).in('entry_date', allDateStrings)
         : Promise.resolve({ data: [] }),
       allDateStrings.length > 0
-        ? supabase.from('lsw_cell_comments').select('*').eq('user_id', userId).in('entry_date', allDateStrings)
+        ? supabase.from('steward_cell_comments').select('*').eq('user_id', userId).in('entry_date', allDateStrings)
         : Promise.resolve({ data: [] }),
     ])
 
@@ -105,10 +105,10 @@ export function useLswData(userId: string | undefined): LswData {
     const key = entryKey(behaviorId, date)
     if (value === null) {
       setEntries(prev => { const next = new Map(prev); next.delete(key); return next })
-      await supabase.from('lsw_entries').delete().eq('behavior_id', behaviorId).eq('entry_date', date).eq('user_id', userId)
+      await supabase.from('steward_entries').delete().eq('behavior_id', behaviorId).eq('entry_date', date).eq('user_id', userId)
     } else {
       setEntries(prev => new Map(prev).set(key, { id: key, behavior_id: behaviorId, entry_date: date, value }))
-      await supabase.from('lsw_entries').upsert(
+      await supabase.from('steward_entries').upsert(
         { user_id: userId, behavior_id: behaviorId, entry_date: date, value, updated_at: new Date().toISOString() },
         { onConflict: 'behavior_id,entry_date' }
       )
@@ -120,10 +120,10 @@ export function useLswData(userId: string | undefined): LswData {
     const key = entryKey(behaviorId, date)
     if (comment.trim() === '') {
       setComments(prev => { const next = new Map(prev); next.delete(key); return next })
-      await supabase.from('lsw_cell_comments').delete().eq('behavior_id', behaviorId).eq('entry_date', date).eq('user_id', userId)
+      await supabase.from('steward_cell_comments').delete().eq('behavior_id', behaviorId).eq('entry_date', date).eq('user_id', userId)
     } else {
       setComments(prev => new Map(prev).set(key, { id: key, behavior_id: behaviorId, entry_date: date, comment }))
-      await supabase.from('lsw_cell_comments').upsert(
+      await supabase.from('steward_cell_comments').upsert(
         { user_id: userId, behavior_id: behaviorId, entry_date: date, comment, updated_at: new Date().toISOString() },
         { onConflict: 'behavior_id,entry_date' }
       )

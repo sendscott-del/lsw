@@ -92,7 +92,7 @@ function TemplatesSection({ userId }: { userId: string }) {
 
   const fetch = useCallback(async () => {
     setLoading(true)
-    const { data } = await supabase.from('lsw_templates').select('*').order('created_at')
+    const { data } = await supabase.from('steward_templates').select('*').order('created_at')
     setTemplates((data ?? []) as Template[])
     setLoading(false)
   }, [])
@@ -101,14 +101,14 @@ function TemplatesSection({ userId }: { userId: string }) {
 
   async function handleCreate() {
     if (!newName.trim()) return
-    await supabase.from('lsw_templates').insert({ name: newName.trim(), created_by: userId })
+    await supabase.from('steward_templates').insert({ name: newName.trim(), created_by: userId })
     setNewName('')
     fetch()
   }
 
   async function handleDelete(id: string) {
     if (!confirm('Delete this template and all its contents?')) return
-    await supabase.from('lsw_templates').delete().eq('id', id)
+    await supabase.from('steward_templates').delete().eq('id', id)
     fetch()
   }
 
@@ -160,8 +160,8 @@ function TemplateEditor({ templateId }: { templateId: string }) {
 
   const fetch = useCallback(async () => {
     const [catRes, behRes] = await Promise.all([
-      supabase.from('lsw_template_categories').select('*').eq('template_id', templateId).order('sort_order'),
-      supabase.from('lsw_template_behaviors').select('*').order('sort_order'),
+      supabase.from('steward_template_categories').select('*').eq('template_id', templateId).order('sort_order'),
+      supabase.from('steward_template_behaviors').select('*').order('sort_order'),
     ])
     const cats = (catRes.data ?? []) as TemplateCategory[]
     setCategories(cats)
@@ -173,7 +173,7 @@ function TemplateEditor({ templateId }: { templateId: string }) {
 
   async function handleAddCategory() {
     if (!newCatName.trim()) return
-    await supabase.from('lsw_template_categories').insert({
+    await supabase.from('steward_template_categories').insert({
       template_id: templateId, name: newCatName.trim(), sort_order: categories.length,
     })
     setNewCatName('')
@@ -181,14 +181,14 @@ function TemplateEditor({ templateId }: { templateId: string }) {
   }
 
   async function handleDeleteCategory(id: string) {
-    await supabase.from('lsw_template_categories').delete().eq('id', id)
+    await supabase.from('steward_template_categories').delete().eq('id', id)
     fetch()
   }
 
   async function handleAddBehavior(categoryId: string) {
     if (!newBehName.trim()) return
     const count = behaviors.filter(b => b.category_id === categoryId).length
-    await supabase.from('lsw_template_behaviors').insert({
+    await supabase.from('steward_template_behaviors').insert({
       category_id: categoryId, name: newBehName.trim(), frequency: newBehFreq, sort_order: count,
     })
     setNewBehName('')
@@ -198,7 +198,7 @@ function TemplateEditor({ templateId }: { templateId: string }) {
   }
 
   async function handleDeleteBehavior(id: string) {
-    await supabase.from('lsw_template_behaviors').delete().eq('id', id)
+    await supabase.from('steward_template_behaviors').delete().eq('id', id)
     fetch()
   }
 
@@ -295,9 +295,9 @@ function GroupsSection({ userId }: { userId: string }) {
 
   const fetch = useCallback(async () => {
     setLoading(true)
-    const { data: groupData } = await supabase.from('lsw_user_groups').select('*').order('name')
+    const { data: groupData } = await supabase.from('steward_user_groups').select('*').order('name')
     setGroups((groupData ?? []) as UserGroup[])
-    const { data: memberData } = await supabase.from('lsw_group_members').select('*')
+    const { data: memberData } = await supabase.from('steward_group_members').select('*')
     setMembers((memberData ?? []) as GroupMember[])
     setLoading(false)
   }, [])
@@ -306,14 +306,14 @@ function GroupsSection({ userId }: { userId: string }) {
 
   async function handleCreate() {
     if (!newName.trim()) return
-    await supabase.from('lsw_user_groups').insert({ name: newName.trim(), created_by: userId })
+    await supabase.from('steward_user_groups').insert({ name: newName.trim(), created_by: userId })
     setNewName('')
     fetch()
   }
 
   async function handleDeleteGroup(id: string) {
     if (!confirm('Delete this group?')) return
-    await supabase.from('lsw_user_groups').delete().eq('id', id)
+    await supabase.from('steward_user_groups').delete().eq('id', id)
     fetch()
   }
 
@@ -324,10 +324,10 @@ function GroupsSection({ userId }: { userId: string }) {
 
     // Look up user by email in auth — we need to query profiles or use a workaround
     // Since we share Supabase with Magnify, profiles table has emails
-    // But LSW might not have a profiles table. Let's check auth.users via a function or
+    // Steward shares Supabase with Magnify, so we can look up users via profiles table
     // just store the email and resolve later. Simplest: try to find in auth metadata.
     // Actually, let's query the Supabase auth admin API... we can't do that from client.
-    // Instead, let's look up by matching email in the lsw_group_members approach:
+    // Instead, let's look up by matching email in the steward_group_members approach:
     // We'll store user_id. But we need to find the user_id from email.
     // The profiles table (from Magnify) has email -> id mapping.
 
@@ -343,7 +343,7 @@ function GroupsSection({ userId }: { userId: string }) {
     }
 
     const { error: insertError } = await supabase
-      .from('lsw_group_members')
+      .from('steward_group_members')
       .insert({ group_id: groupId, user_id: profile.id })
 
     if (insertError) {
@@ -357,7 +357,7 @@ function GroupsSection({ userId }: { userId: string }) {
   }
 
   async function handleRemoveMember(memberId: string) {
-    await supabase.from('lsw_group_members').delete().eq('id', memberId)
+    await supabase.from('steward_group_members').delete().eq('id', memberId)
     fetch()
   }
 
@@ -474,9 +474,9 @@ function AssignSection() {
   const fetch = useCallback(async () => {
     setLoading(true)
     const [tRes, gRes, aRes] = await Promise.all([
-      supabase.from('lsw_templates').select('*').order('name'),
-      supabase.from('lsw_user_groups').select('*').order('name'),
-      supabase.from('lsw_template_assignments').select('*'),
+      supabase.from('steward_templates').select('*').order('name'),
+      supabase.from('steward_user_groups').select('*').order('name'),
+      supabase.from('steward_template_assignments').select('*'),
     ])
     setTemplates((tRes.data ?? []) as Template[])
     setGroups((gRes.data ?? []) as UserGroup[])
@@ -488,7 +488,7 @@ function AssignSection() {
 
   async function handleAssign() {
     if (!selectedTemplate || !selectedGroup) return
-    await supabase.from('lsw_template_assignments').insert({
+    await supabase.from('steward_template_assignments').insert({
       template_id: selectedTemplate,
       group_id: selectedGroup,
     })
@@ -496,7 +496,7 @@ function AssignSection() {
   }
 
   async function handleRemove(id: string) {
-    await supabase.from('lsw_template_assignments').delete().eq('id', id)
+    await supabase.from('steward_template_assignments').delete().eq('id', id)
     fetch()
   }
 

@@ -24,7 +24,7 @@ export default function EditBehaviorModal({ behavior, onSuccess, onClose }: Edit
     e.preventDefault()
     if (!name.trim()) return
     setLoading(true)
-    await supabase.from('lsw_behaviors').update({
+    await supabase.from('steward_behaviors').update({
       name: name.trim(),
       frequency,
       interval,
@@ -38,7 +38,7 @@ export default function EditBehaviorModal({ behavior, onSuccess, onClose }: Edit
 
   async function handleArchive() {
     setLoading(true)
-    await supabase.from('lsw_behaviors').update({
+    await supabase.from('steward_behaviors').update({
       is_archived: !behavior.is_archived, updated_at: new Date().toISOString(),
     }).eq('id', behavior.id)
     setLoading(false)
@@ -49,7 +49,7 @@ export default function EditBehaviorModal({ behavior, onSuccess, onClose }: Edit
   async function handleDelete() {
     if (!confirmDelete) { setConfirmDelete(true); return }
     setLoading(true)
-    await supabase.from('lsw_behaviors').delete().eq('id', behavior.id)
+    await supabase.from('steward_behaviors').delete().eq('id', behavior.id)
     setLoading(false)
     onSuccess()
     onClose()

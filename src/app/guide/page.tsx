@@ -18,12 +18,11 @@ export default function GuidePage() {
       </header>
 
       <div className="max-w-lg mx-auto p-4 space-y-6">
-        <Section title="What is Leader Standard Work?">
+        <Section title="What is Steward?">
           <p>
-            Leader Standard Work (LSW) is a lean methodology tool that helps leaders
-            define, track, and reflect on the key behaviors and tasks that drive
-            effective leadership. Instead of being reactive, LSW makes leadership
-            deliberate and accountable.
+            Steward helps leaders define, track, and reflect on the key behaviors
+            and tasks that drive effective stewardship. Instead of being reactive,
+            Steward makes your service deliberate and accountable.
           </p>
         </Section>
 
@@ -100,7 +99,7 @@ export default function GuidePage() {
         </Section>
 
         <Section title="Templates &amp; Groups (Admin)">
-          <p>Admins can create reusable LSW templates and share them with user groups.</p>
+          <p>Admins can create reusable Steward templates and share them with user groups.</p>
           <ul className="list-disc list-inside space-y-1 mt-2">
             <li><strong>Templates</strong> — A saved set of categories and behaviors. Create them in Admin &gt; Templates</li>
             <li><strong>User Groups</strong> — Named groups of users (e.g., &quot;Bishopric&quot;, &quot;EQ Presidency&quot;). Add members by email</li>
@@ -108,21 +107,21 @@ export default function GuidePage() {
             <li><strong>Customization</strong> — Once a template is applied, users own their copy and can freely modify, add, or remove items</li>
             <li><strong>One-time apply</strong> — Each template is only applied once per user. Re-assigning the same template won&apos;t duplicate items</li>
           </ul>
-          <p className="mt-2 text-xs text-gray-500">To become an admin, add your user ID to the lsw_admins table in Supabase.</p>
+          <p className="mt-2 text-xs text-gray-500">To become an admin, add your user ID to the steward_admins table in Supabase.</p>
         </Section>
 
-        <Section title="Tips for Effective LSW">
+        <Section title="Tips for Effective Steward">
           <ul className="list-disc list-inside space-y-1">
-            <li>Review your LSW first thing each day — plan which behaviors to focus on</li>
+            <li>Review your Steward first thing each day — plan which behaviors to focus on</li>
             <li>Add comments when you miss a task — the &quot;why&quot; is more valuable than the checkmark</li>
             <li>Check the Reflection Log weekly to spot patterns</li>
-            <li>Update your behaviors as your role evolves — LSW is a living document</li>
+            <li>Update your behaviors as your role evolves — Steward is a living document</li>
             <li>Start with 5-7 behaviors and add more as the habit develops</li>
           </ul>
         </Section>
 
         <p className="text-center text-xs text-gray-400 py-4">
-          Leader Standard Work v{APP_VERSION}
+          Steward v{APP_VERSION}
         </p>
       </div>
     </div>

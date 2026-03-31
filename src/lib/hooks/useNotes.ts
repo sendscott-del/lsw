@@ -15,7 +15,7 @@ export function useNotes(userId: string | undefined) {
 
     async function fetchNote() {
       const { data } = await supabase
-        .from('lsw_notes')
+        .from('steward_notes')
         .select('*')
         .eq('user_id', userId)
         .limit(1)
@@ -26,7 +26,7 @@ export function useNotes(userId: string | undefined) {
       } else {
         // Create initial note
         const { data: newNote } = await supabase
-          .from('lsw_notes')
+          .from('steward_notes')
           .insert({ user_id: userId, content: '' })
           .select()
           .single()
@@ -48,7 +48,7 @@ export function useNotes(userId: string | undefined) {
     timeoutRef.current = setTimeout(async () => {
       setSaving(true)
       await supabase
-        .from('lsw_notes')
+        .from('steward_notes')
         .update({ content, updated_at: new Date().toISOString() })
         .eq('id', note.id)
       setSaving(false)

@@ -29,7 +29,7 @@ export default function AddBehaviorModal({
     if (!name.trim()) return
     setLoading(true)
 
-    await supabase.from('lsw_behaviors').insert({
+    await supabase.from('steward_behaviors').insert({
       user_id: userId,
       category_id: categoryId,
       name: name.trim(),

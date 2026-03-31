@@ -4,7 +4,7 @@ import { useState, useMemo, useCallback } from 'react'
 import { Plus } from 'lucide-react'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useTemplateSync } from '@/lib/hooks/useTemplateSync'
-import { useLswData } from '@/lib/hooks/useLswData'
+import { useStewardData } from '@/lib/hooks/useStewardData'
 import AppShell from '@/components/AppShell'
 import type { TabId } from '@/components/AppShell'
 import CategorySection from '@/components/CategorySection'
@@ -25,7 +25,7 @@ export default function HomePage() {
   const [activeTab, setActiveTab] = useState<TabId>('work')
 
   const { categories, behaviors, archivedBehaviors, entries, comments, complianceMap, loading, refresh, upsertEntry, upsertComment } =
-    useLswData(user?.id)
+    useStewardData(user?.id)
 
   // Modal state
   const [cellDetailModal, setCellDetailModal] = useState<{

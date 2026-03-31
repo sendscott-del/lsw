@@ -46,7 +46,7 @@ export default function CategorySection({
       // Exiting reorder mode — save to DB
       if (localOrder) {
         localOrder.forEach((beh, i) => {
-          supabase.from('lsw_behaviors').update({ sort_order: i }).eq('id', beh.id)
+          supabase.from('steward_behaviors').update({ sort_order: i }).eq('id', beh.id)
         })
         onRefresh()
       }

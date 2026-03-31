@@ -14,7 +14,7 @@ export function useTemplateSync(userId: string | undefined) {
     async function sync() {
       // 1. Get groups the user belongs to
       const { data: memberships } = await supabase
-        .from('lsw_group_members')
+        .from('steward_group_members')
         .select('group_id')
         .eq('user_id', userId)
 
@@ -23,7 +23,7 @@ export function useTemplateSync(userId: string | undefined) {
 
       // 2. Get template assignments for those groups
       const { data: assignments } = await supabase
-        .from('lsw_template_assignments')
+        .from('steward_template_assignments')
         .select('template_id')
         .in('group_id', groupIds)
 
@@ -32,7 +32,7 @@ export function useTemplateSync(userId: string | undefined) {
 
       // 3. Check which templates have already been applied
       const { data: applied } = await supabase
-        .from('lsw_template_applied')
+        .from('steward_template_applied')
         .select('template_id')
         .eq('user_id', userId)
 
@@ -44,14 +44,14 @@ export function useTemplateSync(userId: string | undefined) {
       // 4. For each unapplied template, copy categories + behaviors
       for (const templateId of unapplied) {
         const { data: templateCats } = await supabase
-          .from('lsw_template_categories')
+          .from('steward_template_categories')
           .select('*')
           .eq('template_id', templateId)
           .order('sort_order')
 
         if (!templateCats || templateCats.length === 0) {
           // Mark as applied even if empty
-          await supabase.from('lsw_template_applied').insert({
+          await supabase.from('steward_template_applied').insert({
             template_id: templateId,
             user_id: userId,
           })
@@ -60,7 +60,7 @@ export function useTemplateSync(userId: string | undefined) {
 
         // Get existing user categories to set sort_order
         const { data: existingCats } = await supabase
-          .from('lsw_categories')
+          .from('steward_categories')
           .select('sort_order')
           .eq('user_id', userId)
           .order('sort_order', { ascending: false })
@@ -71,7 +71,7 @@ export function useTemplateSync(userId: string | undefined) {
         for (const tCat of templateCats as TemplateCategory[]) {
           // Create user category
           const { data: newCat } = await supabase
-            .from('lsw_categories')
+            .from('steward_categories')
             .insert({
               user_id: userId,
               name: tCat.name,
@@ -84,7 +84,7 @@ export function useTemplateSync(userId: string | undefined) {
 
           // Get behaviors for this template category
           const { data: tBehaviors } = await supabase
-            .from('lsw_template_behaviors')
+            .from('steward_template_behaviors')
             .select('*')
             .eq('category_id', tCat.id)
             .order('sort_order')
@@ -97,12 +97,12 @@ export function useTemplateSync(userId: string | undefined) {
               frequency: b.frequency ?? 'weekly',
               sort_order: i,
             }))
-            await supabase.from('lsw_behaviors').insert(behaviorInserts)
+            await supabase.from('steward_behaviors').insert(behaviorInserts)
           }
         }
 
         // Mark template as applied
-        await supabase.from('lsw_template_applied').insert({
+        await supabase.from('steward_template_applied').insert({
           template_id: templateId,
           user_id: userId,
         })
