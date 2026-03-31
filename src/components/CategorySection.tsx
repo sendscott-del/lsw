@@ -79,7 +79,7 @@ export default function CategorySection({
               <span className="text-[9px] text-gray-400 font-medium">FREQ</span>
             </div>
             <div className="sticky left-[200px] z-10 bg-white w-10 min-w-[2.5rem] border-r border-gray-100 flex items-center justify-center py-1">
-              <span className="text-[9px] text-gray-400 font-medium">12%</span>
+              <span className="text-[9px] text-gray-400 font-medium">12W%</span>
             </div>
             <div className="px-1 py-1">
               <span className="text-[9px] text-gray-400 font-medium">OCCURRENCES</span>

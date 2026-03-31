@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import { formatDate, getPeriodCells, getDefaultCount, getLast12Dates } from '@/lib/dates'
 import type { Category, Behavior, Entry, CellComment, EntryValue } from '@/lib/types'
@@ -28,7 +28,6 @@ export function useLswData(userId: string | undefined): LswData {
   const [archivedBehaviors, setArchivedBehaviors] = useState<Behavior[]>([])
   const [entries, setEntries] = useState<Map<string, Entry>>(new Map())
   const [comments, setComments] = useState<Map<string, CellComment>>(new Map())
-  const [complianceMap, setComplianceMap] = useState<Map<string, number | null>>(new Map())
   const [loading, setLoading] = useState(true)
 
   const fetchData = useCallback(async () => {
@@ -49,13 +48,11 @@ export function useLswData(userId: string | undefined): LswData {
     setBehaviors(activeBehaviors)
     setArchivedBehaviors(archived)
 
-    // Collect all dates we need across all behaviors
+    // Collect all dates we need
     const allDatesSet = new Set<string>()
     for (const beh of activeBehaviors) {
-      // Visible cells (default view)
       const cells = getPeriodCells(beh.frequency, 0, getDefaultCount(beh.frequency))
       for (const d of cells) allDatesSet.add(formatDate(d))
-      // Last 12 for compliance
       const past = getLast12Dates(beh.frequency)
       for (const d of past) allDatesSet.add(formatDate(d))
     }
@@ -79,22 +76,25 @@ export function useLswData(userId: string | undefined): LswData {
     for (const c of (comRes.data ?? []) as CellComment[]) commentMap.set(entryKey(c.behavior_id, c.entry_date), c)
     setComments(commentMap)
 
-    // Compliance: last 12 occurrences per behavior
-    const compMap = new Map<string, number | null>()
-    for (const beh of activeBehaviors) {
-      const pastDates = getLast12Dates(beh.frequency)
-      let completed = 0
-      for (const d of pastDates) {
-        if (entryMap.get(entryKey(beh.id, formatDate(d)))?.value === 'y') completed++
-      }
-      compMap.set(beh.id, pastDates.length > 0 ? (completed / pastDates.length) * 100 : null)
-    }
-    setComplianceMap(compMap)
-
     setLoading(false)
   }, [userId])
 
   useEffect(() => { fetchData() }, [fetchData])
+
+  // Compliance: reactively computed from entries so it updates on every cell tap
+  const complianceMap = useMemo(() => {
+    const compMap = new Map<string, number | null>()
+    for (const beh of behaviors) {
+      const pastDates = getLast12Dates(beh.frequency)
+      if (pastDates.length === 0) { compMap.set(beh.id, null); continue }
+      let completed = 0
+      for (const d of pastDates) {
+        if (entries.get(entryKey(beh.id, formatDate(d)))?.value === 'y') completed++
+      }
+      compMap.set(beh.id, (completed / pastDates.length) * 100)
+    }
+    return compMap
+  }, [behaviors, entries])
 
   const upsertEntry = useCallback(async (behaviorId: string, date: string, value: EntryValue | null) => {
     if (!userId) return
