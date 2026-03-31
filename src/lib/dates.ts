@@ -82,16 +82,16 @@ export function getCellLabel(date: Date, frequency: Frequency): { top: string; b
 export function getLast12Dates(frequency: Frequency): Date[] {
   if (frequency === 'weekly') {
     const baseWeek = getWeekStart(new Date())
-    return Array.from({ length: 12 }, (_, i) => subWeeks(baseWeek, i + 1))
+    return Array.from({ length: 12 }, (_, i) => subWeeks(baseWeek, i))
   }
   if (frequency === 'monthly') {
     const now = new Date()
     const baseMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-    return Array.from({ length: 12 }, (_, i) => subMonths(baseMonth, i + 1))
+    return Array.from({ length: 12 }, (_, i) => subMonths(baseMonth, i))
   }
   // quarterly
   const now = new Date()
   const currentQ = Math.floor(now.getMonth() / 3)
   const baseQ = new Date(now.getFullYear(), currentQ * 3, 1)
-  return Array.from({ length: 12 }, (_, i) => subMonths(baseQ, (i + 1) * 3))
+  return Array.from({ length: 12 }, (_, i) => subMonths(baseQ, i * 3))
 }
