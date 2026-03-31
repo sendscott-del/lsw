@@ -91,7 +91,7 @@ export default function BehaviorRow({
       {/* Col 5: Period cells with scroll arrows */}
       <div className="flex items-center">
         <button
-          onClick={() => setOffset(o => o - visibleCount)}
+          onClick={() => setOffset(o => o - 1)}
           className="p-0.5 md:p-1 text-gray-300 hover:text-gray-600 shrink-0"
         >
           <ChevronLeft size={14} className="md:hidden" /><ChevronLeft size={18} className="hidden md:block" />
@@ -127,7 +127,7 @@ export default function BehaviorRow({
         </div>
 
         <button
-          onClick={() => setOffset(o => o + visibleCount)}
+          onClick={() => setOffset(o => o + 1)}
           className="p-0.5 md:p-1 text-gray-300 hover:text-gray-600 shrink-0"
         >
           <ChevronRight size={14} className="md:hidden" /><ChevronRight size={18} className="hidden md:block" />

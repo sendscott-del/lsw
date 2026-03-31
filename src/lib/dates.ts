@@ -31,7 +31,7 @@ function getWeeklyCells(offset: number, count: number, interval: number, anchorD
   // Find the nearest occurrence on or after now
   const remainder = ((weeksSinceAnchor % interval) + interval) % interval
   const nextOccurrence = remainder === 0 ? now : addWeeks(now, interval - remainder)
-  const start = addWeeks(nextOccurrence, offset * interval * count)
+  const start = addWeeks(nextOccurrence, offset * count * interval)
   return Array.from({ length: count }, (_, i) => addWeeks(start, i * interval))
 }
 
