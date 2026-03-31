@@ -14,6 +14,8 @@ export interface Behavior {
   category_id: string
   name: string
   frequency: Frequency
+  interval: number // every N weeks/months/quarters (default 1)
+  anchor_date: string | null // YYYY-MM-DD, used for "every N weeks" to know which weeks
   is_archived: boolean
   sort_order: number
 }

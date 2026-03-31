@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { X } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { formatDate } from '@/lib/dates'
 import type { Frequency } from '@/lib/types'
 
 interface AddBehaviorModalProps {
@@ -19,6 +20,8 @@ export default function AddBehaviorModal({
 }: AddBehaviorModalProps) {
   const [name, setName] = useState('')
   const [frequency, setFrequency] = useState<Frequency>('weekly')
+  const [interval, setInterval] = useState(1)
+  const [anchorDate, setAnchorDate] = useState(formatDate(new Date()))
   const [loading, setLoading] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
@@ -31,6 +34,8 @@ export default function AddBehaviorModal({
       category_id: categoryId,
       name: name.trim(),
       frequency,
+      interval,
+      anchor_date: frequency === 'weekly' && interval > 1 ? anchorDate : null,
       sort_order: existingCount,
     })
 
@@ -71,20 +76,54 @@ export default function AddBehaviorModal({
           </div>
 
           <div>
-            <label htmlFor="beh-freq" className="block text-sm font-medium text-gray-700 mb-1">
-              Frequency
-            </label>
-            <select
-              id="beh-freq"
-              value={frequency}
-              onChange={e => setFrequency(e.target.value as Frequency)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="weekly">Weekly</option>
-              <option value="monthly">Monthly</option>
-              <option value="quarterly">Quarterly</option>
-            </select>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Frequency</label>
+            <div className="flex gap-2">
+              <select
+                value={frequency}
+                onChange={e => { setFrequency(e.target.value as Frequency); setInterval(1) }}
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+                <option value="quarterly">Quarterly</option>
+              </select>
+            </div>
           </div>
+
+          {frequency === 'weekly' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Every how many weeks?
+              </label>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-500">Every</span>
+                <input
+                  type="number"
+                  min={1}
+                  max={52}
+                  value={interval}
+                  onChange={e => setInterval(Math.max(1, parseInt(e.target.value) || 1))}
+                  className="w-16 px-3 py-2 border border-gray-300 rounded-lg text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <span className="text-sm text-gray-500">{interval === 1 ? 'week' : 'weeks'}</span>
+              </div>
+            </div>
+          )}
+
+          {frequency === 'weekly' && interval > 1 && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Starting from week of
+              </label>
+              <input
+                type="date"
+                value={anchorDate}
+                onChange={e => setAnchorDate(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <p className="text-xs text-gray-400 mt-1">Pick any date in the first week this task applies</p>
+            </div>
+          )}
 
           <button
             type="submit"

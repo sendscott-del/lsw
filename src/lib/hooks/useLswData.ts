@@ -51,9 +51,9 @@ export function useLswData(userId: string | undefined): LswData {
     // Collect all dates we need
     const allDatesSet = new Set<string>()
     for (const beh of activeBehaviors) {
-      const cells = getPeriodCells(beh.frequency, 0, getDefaultCount(beh.frequency))
+      const cells = getPeriodCells(beh.frequency, 0, getDefaultCount(beh.frequency), beh.interval ?? 1, beh.anchor_date)
       for (const d of cells) allDatesSet.add(formatDate(d))
-      const past = getLast12Dates(beh.frequency)
+      const past = getLast12Dates(beh.frequency, beh.interval ?? 1, beh.anchor_date)
       for (const d of past) allDatesSet.add(formatDate(d))
     }
 
@@ -85,7 +85,7 @@ export function useLswData(userId: string | undefined): LswData {
   const complianceMap = useMemo(() => {
     const compMap = new Map<string, number | null>()
     for (const beh of behaviors) {
-      const pastDates = getLast12Dates(beh.frequency)
+      const pastDates = getLast12Dates(beh.frequency, beh.interval ?? 1, beh.anchor_date)
       if (pastDates.length === 0) { compMap.set(beh.id, null); continue }
       let completed = 0
       for (const d of pastDates) {

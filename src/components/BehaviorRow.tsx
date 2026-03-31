@@ -28,7 +28,11 @@ function cycleValue(current: EntryValue | null): EntryValue | null {
   return null
 }
 
-const FREQ_LABELS = { weekly: 'Weekly', monthly: 'Monthly', quarterly: 'Quarterly' }
+function freqLabel(frequency: string, interval: number): string {
+  if (frequency === 'weekly') return interval > 1 ? `Every ${interval} wks` : 'Weekly'
+  if (frequency === 'monthly') return interval > 1 ? `Every ${interval} mo` : 'Monthly'
+  return interval > 1 ? `Every ${interval} qtrs` : 'Quarterly'
+}
 
 export default function BehaviorRow({
   behavior, entries, comments, compliancePercent,
@@ -39,8 +43,8 @@ export default function BehaviorRow({
   const [offset, setOffset] = useState(0)
 
   const cells = useMemo(
-    () => getPeriodCells(behavior.frequency, offset, visibleCount),
-    [behavior.frequency, offset, visibleCount]
+    () => getPeriodCells(behavior.frequency, offset, visibleCount, behavior.interval ?? 1, behavior.anchor_date ?? null),
+    [behavior.frequency, behavior.interval, behavior.anchor_date, offset, visibleCount]
   )
 
   const pct = compliancePercent != null ? Math.round(compliancePercent) : null
@@ -73,7 +77,7 @@ export default function BehaviorRow({
 
       {/* Col 3: Frequency label */}
       <div className="sticky left-[136px] md:left-[244px] lg:left-[324px] z-10 bg-white flex items-center w-16 md:w-20 min-w-[4rem] md:min-w-[5rem] px-1.5 md:px-2 py-1 border-r border-gray-100">
-        <span className="text-[10px] md:text-xs text-gray-500 font-medium">{FREQ_LABELS[behavior.frequency]}</span>
+        <span className="text-[10px] md:text-xs text-gray-500 font-medium">{freqLabel(behavior.frequency, behavior.interval ?? 1)}</span>
       </div>
 
       {/* Col 4: 12-occurrence compliance % */}

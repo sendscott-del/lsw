@@ -1,4 +1,4 @@
-export const APP_VERSION = '1.7.0'
+export const APP_VERSION = '1.8.0'
 
 export interface ChangelogEntry {
   version: string
@@ -8,6 +8,16 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '1.8.0',
+    date: '2026-03-30',
+    enhancements: [
+      'Every N weeks scheduling — set a task to repeat every 2, 3, 4+ weeks with a start date anchor',
+      'Frequency label shows interval (e.g., "Every 2 wks")',
+      'Responsive desktop layout — wider columns, larger cells, more visible occurrences on bigger screens',
+    ],
+    bugFixes: [],
+  },
   {
     version: '1.7.0',
     date: '2026-03-30',

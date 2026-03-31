@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { X, Archive, RotateCcw, Trash2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { formatDate } from '@/lib/dates'
 import type { Behavior, Frequency } from '@/lib/types'
 
 interface EditBehaviorModalProps {
@@ -14,6 +15,8 @@ interface EditBehaviorModalProps {
 export default function EditBehaviorModal({ behavior, onSuccess, onClose }: EditBehaviorModalProps) {
   const [name, setName] = useState(behavior.name)
   const [frequency, setFrequency] = useState<Frequency>(behavior.frequency ?? 'weekly')
+  const [interval, setInterval] = useState(behavior.interval ?? 1)
+  const [anchorDate, setAnchorDate] = useState(behavior.anchor_date ?? formatDate(new Date()))
   const [loading, setLoading] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
 
@@ -22,7 +25,11 @@ export default function EditBehaviorModal({ behavior, onSuccess, onClose }: Edit
     if (!name.trim()) return
     setLoading(true)
     await supabase.from('lsw_behaviors').update({
-      name: name.trim(), frequency, updated_at: new Date().toISOString(),
+      name: name.trim(),
+      frequency,
+      interval,
+      anchor_date: frequency === 'weekly' && interval > 1 ? anchorDate : null,
+      updated_at: new Date().toISOString(),
     }).eq('id', behavior.id)
     setLoading(false)
     onSuccess()
@@ -71,18 +78,43 @@ export default function EditBehaviorModal({ behavior, onSuccess, onClose }: Edit
           </div>
 
           <div>
-            <label htmlFor="edit-freq" className="block text-sm font-medium text-gray-700 mb-1">
-              Frequency
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Frequency</label>
             <select
-              id="edit-freq" value={frequency} onChange={e => setFrequency(e.target.value as Frequency)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              value={frequency}
+              onChange={e => { setFrequency(e.target.value as Frequency); setInterval(1) }}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="weekly">Weekly</option>
               <option value="monthly">Monthly</option>
               <option value="quarterly">Quarterly</option>
             </select>
           </div>
+
+          {frequency === 'weekly' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Every how many weeks?</label>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-500">Every</span>
+                <input
+                  type="number" min={1} max={52} value={interval}
+                  onChange={e => setInterval(Math.max(1, parseInt(e.target.value) || 1))}
+                  className="w-16 px-3 py-2 border border-gray-300 rounded-lg text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <span className="text-sm text-gray-500">{interval === 1 ? 'week' : 'weeks'}</span>
+              </div>
+            </div>
+          )}
+
+          {frequency === 'weekly' && interval > 1 && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Starting from week of</label>
+              <input
+                type="date" value={anchorDate} onChange={e => setAnchorDate(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <p className="text-xs text-gray-400 mt-1">Pick any date in the first week this task applies</p>
+            </div>
+          )}
 
           <button type="submit" disabled={loading || !name.trim()}
             className="w-full py-2.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50">

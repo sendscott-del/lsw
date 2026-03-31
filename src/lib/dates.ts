@@ -1,4 +1,4 @@
-import { startOfWeek, addWeeks, subWeeks, addMonths, subMonths, format, isSameDay } from 'date-fns'
+import { startOfWeek, addWeeks, subWeeks, addMonths, subMonths, differenceInWeeks, format, isSameDay } from 'date-fns'
 import type { Frequency } from '@/lib/types'
 
 export function formatDate(date: Date): string {
@@ -9,45 +9,57 @@ export function isToday(date: Date): boolean {
   return isSameDay(date, new Date())
 }
 
-// Get the Sunday that starts the week containing a date
 export function getWeekStart(date: Date): Date {
   return startOfWeek(date, { weekStartsOn: 0 })
 }
 
-// --- Period date generation ---
+// --- Period date generation (supports interval) ---
 
-// Weekly: returns Sundays (week-start dates)
-export function getWeeklyCells(startOffset: number, count: number): Date[] {
-  const baseWeek = getWeekStart(new Date())
-  const start = addWeeks(baseWeek, startOffset)
-  return Array.from({ length: count }, (_, i) => addWeeks(start, i))
+// Weekly: every N weeks from anchor. offset shifts the visible window.
+function getWeeklyCells(offset: number, count: number, interval: number, anchorDate: Date | null): Date[] {
+  if (interval <= 1 || !anchorDate) {
+    // Simple: every week
+    const baseWeek = getWeekStart(new Date())
+    const start = addWeeks(baseWeek, offset * interval)
+    return Array.from({ length: count }, (_, i) => addWeeks(start, i * interval))
+  }
+
+  // Every N weeks from anchor
+  const anchor = getWeekStart(anchorDate)
+  const now = getWeekStart(new Date())
+  const weeksSinceAnchor = differenceInWeeks(now, anchor)
+  // Find the nearest occurrence on or after now
+  const remainder = ((weeksSinceAnchor % interval) + interval) % interval
+  const nextOccurrence = remainder === 0 ? now : addWeeks(now, interval - remainder)
+  const start = addWeeks(nextOccurrence, offset * interval * count)
+  return Array.from({ length: count }, (_, i) => addWeeks(start, i * interval))
 }
 
-// Monthly: returns 1st of each month
-export function getMonthlyCells(startOffset: number, count: number): Date[] {
+function getMonthlyCells(offset: number, count: number, interval: number): Date[] {
   const now = new Date()
   const baseMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-  const start = addMonths(baseMonth, startOffset)
-  return Array.from({ length: count }, (_, i) => addMonths(start, i))
+  const start = addMonths(baseMonth, offset * count * interval)
+  return Array.from({ length: count }, (_, i) => addMonths(start, i * interval))
 }
 
-// Quarterly: returns 1st of quarter months (Jan, Apr, Jul, Oct)
-export function getQuarterlyCells(startOffset: number, count: number): Date[] {
+function getQuarterlyCells(offset: number, count: number, interval: number): Date[] {
   const now = new Date()
-  const currentQuarter = Math.floor(now.getMonth() / 3)
-  const baseQuarter = new Date(now.getFullYear(), currentQuarter * 3, 1)
-  const start = addMonths(baseQuarter, startOffset * 3)
-  return Array.from({ length: count }, (_, i) => addMonths(start, i * 3))
+  const currentQ = Math.floor(now.getMonth() / 3)
+  const baseQ = new Date(now.getFullYear(), currentQ * 3, 1)
+  const start = addMonths(baseQ, offset * count * 3 * interval)
+  return Array.from({ length: count }, (_, i) => addMonths(start, i * 3 * interval))
 }
 
-// Get period cells based on frequency
-export function getPeriodCells(frequency: Frequency, offset: number, count: number): Date[] {
-  if (frequency === 'weekly') return getWeeklyCells(offset, count)
-  if (frequency === 'monthly') return getMonthlyCells(offset, count)
-  return getQuarterlyCells(offset, count)
+export function getPeriodCells(
+  frequency: Frequency, offset: number, count: number,
+  interval: number = 1, anchorDate: string | null = null
+): Date[] {
+  const anchor = anchorDate ? new Date(anchorDate + 'T00:00:00') : null
+  if (frequency === 'weekly') return getWeeklyCells(offset, count, interval, anchor)
+  if (frequency === 'monthly') return getMonthlyCells(offset, count, interval)
+  return getQuarterlyCells(offset, count, interval)
 }
 
-// Default visible count per frequency
 export function getDefaultCount(frequency: Frequency): number {
   if (frequency === 'weekly') return 4
   if (frequency === 'monthly') return 12
@@ -58,40 +70,41 @@ export function getDefaultCount(frequency: Frequency): number {
 
 export function getCellLabel(date: Date, frequency: Frequency): { top: string; bottom: string } {
   if (frequency === 'weekly') {
-    return {
-      top: format(date, 'MMM'),
-      bottom: format(date, 'd'),
-    }
+    return { top: format(date, 'MMM'), bottom: format(date, 'd') }
   }
   if (frequency === 'monthly') {
-    return {
-      top: format(date, 'yyyy'),
-      bottom: format(date, 'MMM'),
-    }
+    return { top: format(date, 'yyyy'), bottom: format(date, 'MMM') }
   }
-  // quarterly
   const q = Math.floor(date.getMonth() / 3) + 1
-  return {
-    top: format(date, 'yyyy'),
-    bottom: `Q${q}`,
-  }
+  return { top: format(date, 'yyyy'), bottom: `Q${q}` }
 }
 
-// --- Compliance: last 12 occurrences ---
+// --- Compliance: last 12 occurrences (supports interval) ---
 
-export function getLast12Dates(frequency: Frequency): Date[] {
+export function getLast12Dates(
+  frequency: Frequency, interval: number = 1, anchorDate: string | null = null
+): Date[] {
   if (frequency === 'weekly') {
-    const baseWeek = getWeekStart(new Date())
-    return Array.from({ length: 12 }, (_, i) => subWeeks(baseWeek, i))
+    if (interval <= 1 || !anchorDate) {
+      const baseWeek = getWeekStart(new Date())
+      return Array.from({ length: 12 }, (_, i) => subWeeks(baseWeek, i))
+    }
+    // Every N weeks from anchor, going backward
+    const anchor = getWeekStart(new Date(anchorDate + 'T00:00:00'))
+    const now = getWeekStart(new Date())
+    const weeksSinceAnchor = differenceInWeeks(now, anchor)
+    const remainder = ((weeksSinceAnchor % interval) + interval) % interval
+    const latestOccurrence = remainder === 0 ? now : subWeeks(now, remainder)
+    return Array.from({ length: 12 }, (_, i) => subWeeks(latestOccurrence, i * interval))
   }
   if (frequency === 'monthly') {
     const now = new Date()
     const baseMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-    return Array.from({ length: 12 }, (_, i) => subMonths(baseMonth, i))
+    return Array.from({ length: 12 }, (_, i) => subMonths(baseMonth, i * interval))
   }
   // quarterly
   const now = new Date()
   const currentQ = Math.floor(now.getMonth() / 3)
   const baseQ = new Date(now.getFullYear(), currentQ * 3, 1)
-  return Array.from({ length: 12 }, (_, i) => subMonths(baseQ, i * 3))
+  return Array.from({ length: 12 }, (_, i) => subMonths(baseQ, i * 3 * interval))
 }
