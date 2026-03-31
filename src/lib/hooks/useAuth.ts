@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { User } from '@supabase/supabase-js'
 
@@ -9,6 +9,7 @@ export function useAuth() {
   const [loading, setLoading] = useState(true)
   const [isAdmin, setIsAdmin] = useState(false)
   const [adminLoading, setAdminLoading] = useState(true)
+  const checkedUserId = useRef<string | null>(null)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -25,30 +26,34 @@ export function useAuth() {
   }, [])
 
   useEffect(() => {
-    if (!user) {
+    const uid = user?.id ?? null
+
+    if (!uid) {
       setIsAdmin(false)
       setAdminLoading(false)
+      checkedUserId.current = null
       return
     }
 
+    // Don't re-check if we already checked this user
+    if (checkedUserId.current === uid) return
+
     setAdminLoading(true)
-    let cancelled = false
 
     supabase
       .from('lsw_admins')
       .select('user_id')
-      .eq('user_id', user.id)
+      .eq('user_id', uid)
       .then(({ data, error }) => {
-        if (cancelled) return
-        console.log('[LSW Admin Check]', { userId: user.id, data, error, isAdmin: !error && (data ?? []).length > 0 })
-        setIsAdmin(!error && (data ?? []).length > 0)
+        const result = !error && (data ?? []).length > 0
+        setIsAdmin(result)
         setAdminLoading(false)
+        checkedUserId.current = uid
       })
-
-    return () => { cancelled = true }
   }, [user?.id])
 
   const signOut = async () => {
+    checkedUserId.current = null
     await supabase.auth.signOut()
   }
 
