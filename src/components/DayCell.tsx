@@ -76,7 +76,7 @@ export default function DayCell({ value, hasComment, isToday, isApplicable, onTa
 
   if (!isApplicable) {
     return (
-      <div className="cell-tap flex items-center justify-center w-10 h-10 min-w-[2.5rem] rounded text-xs text-gray-300 bg-gray-50/50">
+      <div className="cell-tap flex items-center justify-center w-10 h-10 md:w-12 md:h-12 min-w-[2.5rem] md:min-w-[3rem] rounded text-xs md:text-sm text-gray-300 bg-gray-50/50">
         —
       </div>
     )
@@ -86,7 +86,7 @@ export default function DayCell({ value, hasComment, isToday, isApplicable, onTa
 
   return (
     <div
-      className={`cell-tap relative flex items-center justify-center w-10 h-10 min-w-[2.5rem] rounded border text-xs font-bold select-none cursor-pointer ${bgStyle}`}
+      className={`cell-tap relative flex items-center justify-center w-10 h-10 md:w-12 md:h-12 min-w-[2.5rem] md:min-w-[3rem] rounded border text-xs md:text-sm font-bold select-none cursor-pointer ${bgStyle}`}
       // Touch (mobile)
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}

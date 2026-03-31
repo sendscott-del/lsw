@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react'
 import DayCell from './DayCell'
 import { Pencil, ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
 import type { Behavior, Entry, CellComment, EntryValue } from '@/lib/types'
-import { formatDate, isToday as checkIsToday, getPeriodCells, getDefaultCount, getCellLabel } from '@/lib/dates'
+import { formatDate, isToday as checkIsToday, getPeriodCells, getCellLabel } from '@/lib/dates'
 
 interface BehaviorRowProps {
   behavior: Behavior
@@ -19,6 +19,7 @@ interface BehaviorRowProps {
   onMoveDown?: () => void
   isFirst?: boolean
   isLast?: boolean
+  visibleCount: number
 }
 
 function cycleValue(current: EntryValue | null): EntryValue | null {
@@ -33,13 +34,13 @@ export default function BehaviorRow({
   behavior, entries, comments, compliancePercent,
   onCellTap, onCellLongPress, onEditBehavior,
   reorderMode, onMoveUp, onMoveDown, isFirst, isLast,
+  visibleCount,
 }: BehaviorRowProps) {
   const [offset, setOffset] = useState(0)
-  const count = getDefaultCount(behavior.frequency)
 
   const cells = useMemo(
-    () => getPeriodCells(behavior.frequency, offset, count),
-    [behavior.frequency, offset, count]
+    () => getPeriodCells(behavior.frequency, offset, visibleCount),
+    [behavior.frequency, offset, visibleCount]
   )
 
   const pct = compliancePercent != null ? Math.round(compliancePercent) : null
@@ -48,36 +49,36 @@ export default function BehaviorRow({
   return (
     <div className="flex items-stretch border-b border-gray-100">
       {/* Col 1: Edit or Reorder */}
-      <div className="sticky left-0 z-10 bg-white flex flex-col items-center justify-center w-9 min-w-[2.25rem] border-r border-gray-100 py-1">
+      <div className="sticky left-0 z-10 bg-white flex flex-col items-center justify-center w-9 md:w-11 min-w-[2.25rem] md:min-w-[2.75rem] border-r border-gray-100 py-1">
         {reorderMode ? (
           <>
             <button onClick={onMoveUp} disabled={isFirst} className="p-0.5 text-gray-400 hover:text-blue-600 disabled:opacity-20">
-              <ChevronUp size={14} />
+              <ChevronUp size={14} className="md:hidden" /><ChevronUp size={18} className="hidden md:block" />
             </button>
             <button onClick={onMoveDown} disabled={isLast} className="p-0.5 text-gray-400 hover:text-blue-600 disabled:opacity-20">
-              <ChevronDown size={14} />
+              <ChevronDown size={14} className="md:hidden" /><ChevronDown size={18} className="hidden md:block" />
             </button>
           </>
         ) : (
           <button onClick={() => onEditBehavior(behavior.id)} className="p-0.5 text-gray-300 hover:text-blue-500">
-            <Pencil size={12} />
+            <Pencil size={12} className="md:hidden" /><Pencil size={16} className="hidden md:block" />
           </button>
         )}
       </div>
 
       {/* Col 2: Task description */}
-      <div className="sticky left-9 z-10 bg-white flex items-center min-w-[100px] max-w-[100px] px-2 py-1.5 border-r border-gray-100">
-        <p className="text-xs leading-tight text-gray-800 break-words min-w-0">{behavior.name}</p>
+      <div className="sticky left-9 md:left-11 z-10 bg-white flex items-center min-w-[100px] max-w-[100px] md:min-w-[200px] md:max-w-[200px] lg:min-w-[280px] lg:max-w-[280px] px-2 md:px-3 py-1.5 md:py-2 border-r border-gray-100">
+        <p className="text-xs md:text-sm leading-tight text-gray-800 break-words min-w-0">{behavior.name}</p>
       </div>
 
       {/* Col 3: Frequency label */}
-      <div className="sticky left-[136px] z-10 bg-white flex items-center w-16 min-w-[4rem] px-1.5 py-1 border-r border-gray-100">
-        <span className="text-[10px] text-gray-500 font-medium">{FREQ_LABELS[behavior.frequency]}</span>
+      <div className="sticky left-[136px] md:left-[244px] lg:left-[324px] z-10 bg-white flex items-center w-16 md:w-20 min-w-[4rem] md:min-w-[5rem] px-1.5 md:px-2 py-1 border-r border-gray-100">
+        <span className="text-[10px] md:text-xs text-gray-500 font-medium">{FREQ_LABELS[behavior.frequency]}</span>
       </div>
 
       {/* Col 4: 12-occurrence compliance % */}
-      <div className="sticky left-[200px] z-10 bg-white flex items-center justify-center w-10 min-w-[2.5rem] border-r border-gray-100">
-        <span className={`text-[10px] font-bold ${pctColor}`}>
+      <div className="sticky left-[200px] md:left-[324px] lg:left-[404px] z-10 bg-white flex items-center justify-center w-10 md:w-14 min-w-[2.5rem] md:min-w-[3.5rem] border-r border-gray-100">
+        <span className={`text-[10px] md:text-sm font-bold ${pctColor}`}>
           {pct != null ? `${pct}%` : '—'}
         </span>
       </div>
@@ -85,13 +86,13 @@ export default function BehaviorRow({
       {/* Col 5: Period cells with scroll arrows */}
       <div className="flex items-center">
         <button
-          onClick={() => setOffset(o => o - count)}
-          className="p-0.5 text-gray-300 hover:text-gray-600 shrink-0"
+          onClick={() => setOffset(o => o - visibleCount)}
+          className="p-0.5 md:p-1 text-gray-300 hover:text-gray-600 shrink-0"
         >
-          <ChevronLeft size={14} />
+          <ChevronLeft size={14} className="md:hidden" /><ChevronLeft size={18} className="hidden md:block" />
         </button>
 
-        <div className="flex items-stretch">
+        <div className="flex items-stretch gap-0 md:gap-1">
           {cells.map(date => {
             const dateStr = formatDate(date)
             const key = `${behavior.id}_${dateStr}`
@@ -100,11 +101,11 @@ export default function BehaviorRow({
             const { top, bottom } = getCellLabel(date, behavior.frequency)
 
             return (
-              <div key={dateStr} className="flex flex-col items-center px-0.5 py-1">
-                <span className={`text-[7px] leading-none ${checkIsToday(date) ? 'text-blue-600' : 'text-gray-400'}`}>
+              <div key={dateStr} className="flex flex-col items-center px-0.5 md:px-1 py-1">
+                <span className={`text-[7px] md:text-[9px] leading-none ${checkIsToday(date) ? 'text-blue-600' : 'text-gray-400'}`}>
                   {top}
                 </span>
-                <span className={`text-[9px] font-medium leading-none mb-0.5 ${checkIsToday(date) ? 'text-blue-600' : 'text-gray-500'}`}>
+                <span className={`text-[9px] md:text-xs font-medium leading-none mb-0.5 ${checkIsToday(date) ? 'text-blue-600' : 'text-gray-500'}`}>
                   {bottom}
                 </span>
                 <DayCell
@@ -121,10 +122,10 @@ export default function BehaviorRow({
         </div>
 
         <button
-          onClick={() => setOffset(o => o + count)}
-          className="p-0.5 text-gray-300 hover:text-gray-600 shrink-0"
+          onClick={() => setOffset(o => o + visibleCount)}
+          className="p-0.5 md:p-1 text-gray-300 hover:text-gray-600 shrink-0"
         >
-          <ChevronRight size={14} />
+          <ChevronRight size={14} className="md:hidden" /><ChevronRight size={18} className="hidden md:block" />
         </button>
       </div>
     </div>

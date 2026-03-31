@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronRight, Plus, Pencil, Archive, ArrowUpDown } from 'lucide-react'
 import BehaviorRow from './BehaviorRow'
+import { useScreenSize } from '@/lib/hooks/useScreenSize'
 import type { Category, Behavior, Entry, CellComment, EntryValue } from '@/lib/types'
 import { supabase } from '@/lib/supabase'
 
@@ -21,6 +22,12 @@ interface CategorySectionProps {
   onRefresh: () => void
 }
 
+function getVisibleCount(frequency: string, isDesktop: boolean): number {
+  if (frequency === 'weekly') return isDesktop ? 8 : 4
+  if (frequency === 'monthly') return isDesktop ? 12 : 6
+  return isDesktop ? 8 : 4 // quarterly
+}
+
 export default function CategorySection({
   category, behaviors, archivedBehaviors, entries, comments, complianceMap,
   onCellTap, onCellLongPress, onAddBehavior, onEditBehavior, onEditCategory, onRefresh,
@@ -28,14 +35,13 @@ export default function CategorySection({
   const [collapsed, setCollapsed] = useState(false)
   const [showArchived, setShowArchived] = useState(false)
   const [reorderMode, setReorderMode] = useState(false)
+  const { isDesktop } = useScreenSize()
 
   async function handleMove(index: number, direction: -1 | 1) {
     const swapIndex = index + direction
     if (swapIndex < 0 || swapIndex >= behaviors.length) return
-
     const a = behaviors[index]
     const b = behaviors[swapIndex]
-
     await Promise.all([
       supabase.from('lsw_behaviors').update({ sort_order: b.sort_order }).eq('id', a.id),
       supabase.from('lsw_behaviors').update({ sort_order: a.sort_order }).eq('id', b.id),
@@ -46,10 +52,10 @@ export default function CategorySection({
   return (
     <div className="mb-2">
       {/* Category header */}
-      <div className="flex items-center bg-gray-50 border-b border-gray-200 px-3 py-2">
+      <div className="flex items-center bg-gray-50 border-b border-gray-200 px-3 py-2 md:py-3">
         <button onClick={() => setCollapsed(!collapsed)} className="flex items-center gap-1 flex-1 min-w-0">
           {collapsed ? <ChevronRight size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}
-          <span className="text-sm font-semibold text-gray-700 truncate">{category.name}</span>
+          <span className="text-sm md:text-base font-semibold text-gray-700 truncate">{category.name}</span>
           <span className="text-xs text-gray-400 ml-1">({behaviors.length})</span>
         </button>
         <button
@@ -71,18 +77,18 @@ export default function CategorySection({
         <div className="overflow-x-auto">
           {/* Column headers */}
           <div className="flex items-stretch">
-            <div className="sticky left-0 z-10 bg-white w-9 min-w-[2.25rem] border-r border-gray-100" />
-            <div className="sticky left-9 z-10 bg-white min-w-[100px] max-w-[100px] border-r border-gray-100 px-2 py-1">
-              <span className="text-[9px] text-gray-400 font-medium">TASK</span>
+            <div className="sticky left-0 z-10 bg-white w-9 md:w-11 min-w-[2.25rem] md:min-w-[2.75rem] border-r border-gray-100" />
+            <div className="sticky left-9 md:left-11 z-10 bg-white min-w-[100px] max-w-[100px] md:min-w-[200px] md:max-w-[200px] lg:min-w-[280px] lg:max-w-[280px] border-r border-gray-100 px-2 md:px-3 py-1">
+              <span className="text-[9px] md:text-xs text-gray-400 font-medium">TASK</span>
             </div>
-            <div className="sticky left-[136px] z-10 bg-white w-16 min-w-[4rem] border-r border-gray-100 px-1.5 py-1">
-              <span className="text-[9px] text-gray-400 font-medium">FREQ</span>
+            <div className="sticky left-[136px] md:left-[244px] lg:left-[324px] z-10 bg-white w-16 md:w-20 min-w-[4rem] md:min-w-[5rem] border-r border-gray-100 px-1.5 md:px-2 py-1">
+              <span className="text-[9px] md:text-xs text-gray-400 font-medium">FREQ</span>
             </div>
-            <div className="sticky left-[200px] z-10 bg-white w-10 min-w-[2.5rem] border-r border-gray-100 flex items-center justify-center py-1">
-              <span className="text-[9px] text-gray-400 font-medium">12W%</span>
+            <div className="sticky left-[200px] md:left-[324px] lg:left-[404px] z-10 bg-white w-10 md:w-14 min-w-[2.5rem] md:min-w-[3.5rem] border-r border-gray-100 flex items-center justify-center py-1">
+              <span className="text-[9px] md:text-xs text-gray-400 font-medium">12W%</span>
             </div>
-            <div className="px-1 py-1">
-              <span className="text-[9px] text-gray-400 font-medium">OCCURRENCES</span>
+            <div className="px-1 md:px-2 py-1">
+              <span className="text-[9px] md:text-xs text-gray-400 font-medium">OCCURRENCES</span>
             </div>
           </div>
 
@@ -102,6 +108,7 @@ export default function CategorySection({
               onMoveDown={() => handleMove(index, 1)}
               isFirst={index === 0}
               isLast={index === behaviors.length - 1}
+              visibleCount={getVisibleCount(behavior.frequency, isDesktop)}
             />
           ))}
 
@@ -131,6 +138,7 @@ export default function CategorySection({
                       onCellLongPress={onCellLongPress}
                       onEditBehavior={onEditBehavior}
                       reorderMode={false}
+                      visibleCount={getVisibleCount(behavior.frequency, isDesktop)}
                     />
                   ))}
                 </div>
