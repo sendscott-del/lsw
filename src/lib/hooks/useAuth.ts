@@ -33,9 +33,8 @@ export function useAuth() {
       .from('lsw_admins')
       .select('user_id')
       .eq('user_id', user.id)
-      .single()
       .then(({ data }) => {
-        setIsAdmin(!!data)
+        setIsAdmin((data ?? []).length > 0)
       })
   }, [user])
 
