@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
-import { formatDate, getPeriodCells, getDefaultCount, getLast12Dates } from '@/lib/dates'
+import { formatDate, getLast12Dates, getWeekStart } from '@/lib/dates'
+import { addWeeks, addMonths } from 'date-fns'
 import type { Category, Behavior, Entry, CellComment, EntryValue } from '@/lib/types'
 
 interface StewardData {
@@ -48,24 +49,28 @@ export function useStewardData(userId: string | undefined): StewardData {
     setBehaviors(activeBehaviors)
     setArchivedBehaviors(archived)
 
-    // Collect all dates we need
+    // Collect all dates: current periods + navigation range + compliance history
     const allDatesSet = new Set<string>()
-    for (const beh of activeBehaviors) {
-      const cells = getPeriodCells(beh.frequency, 0, getDefaultCount(beh.frequency), beh.interval ?? 1, beh.anchor_date)
-      for (const d of cells) allDatesSet.add(formatDate(d))
-      const past = getLast12Dates(beh.frequency, beh.interval ?? 1, beh.anchor_date)
-      for (const d of past) allDatesSet.add(formatDate(d))
-    }
+    const now = new Date()
+
+    // Weekly: 12 back + 4 forward
+    const baseWeek = getWeekStart(now)
+    for (let i = -12; i <= 4; i++) allDatesSet.add(formatDate(addWeeks(baseWeek, i)))
+
+    // Monthly: 12 back + 6 forward
+    const baseMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+    for (let i = -12; i <= 6; i++) allDatesSet.add(formatDate(addMonths(baseMonth, i)))
+
+    // Quarterly: 12 back + 4 forward
+    const currentQ = Math.floor(now.getMonth() / 3)
+    const baseQ = new Date(now.getFullYear(), currentQ * 3, 1)
+    for (let i = -12; i <= 4; i++) allDatesSet.add(formatDate(addMonths(baseQ, i * 3)))
 
     const allDateStrings = [...allDatesSet]
 
     const [entRes, comRes] = await Promise.all([
-      allDateStrings.length > 0
-        ? supabase.from('steward_entries').select('*').eq('user_id', userId).in('entry_date', allDateStrings)
-        : Promise.resolve({ data: [] }),
-      allDateStrings.length > 0
-        ? supabase.from('steward_cell_comments').select('*').eq('user_id', userId).in('entry_date', allDateStrings)
-        : Promise.resolve({ data: [] }),
+      supabase.from('steward_entries').select('*').eq('user_id', userId).in('entry_date', allDateStrings),
+      supabase.from('steward_cell_comments').select('*').eq('user_id', userId).in('entry_date', allDateStrings),
     ])
 
     const entryMap = new Map<string, Entry>()
@@ -81,7 +86,7 @@ export function useStewardData(userId: string | undefined): StewardData {
 
   useEffect(() => { fetchData() }, [fetchData])
 
-  // Compliance: reactively computed from entries so it updates on every cell tap
+  // Compliance: reactively computed
   const complianceMap = useMemo(() => {
     const compMap = new Map<string, number | null>()
     for (const beh of behaviors) {
@@ -91,7 +96,7 @@ export function useStewardData(userId: string | undefined): StewardData {
       let applicable = 0
       for (const d of pastDates) {
         const entry = entries.get(entryKey(beh.id, formatDate(d)))
-        if (entry?.value === 'na') continue // NA doesn't count in denominator
+        if (entry?.value === 'na') continue
         applicable++
         if (entry?.value === 'y') completed++
       }

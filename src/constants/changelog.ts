@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.0.0'
+export const APP_VERSION = '2.1.0'
 
 export interface ChangelogEntry {
   version: string
@@ -8,6 +8,21 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.1.0',
+    date: '2026-03-31',
+    enhancements: [
+      'Complete UI redesign: three-section checklist (This Week / This Month / This Quarter)',
+      'Large tap targets — no more accidental marking when scrolling',
+      'Behaviors grouped by category within each time period',
+      'Completion counter (done/total) per section with period navigation',
+      'Completed items show strikethrough, N/A items dimmed',
+      'Inline compliance %, comment indicator, and edit buttons per row',
+    ],
+    bugFixes: [
+      'Fixed accidental cell marking when scrolling on mobile',
+    ],
+  },
   {
     version: '2.0.0',
     date: '2026-03-31',

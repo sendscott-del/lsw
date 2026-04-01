@@ -5,9 +5,11 @@ import { Plus } from 'lucide-react'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useTemplateSync } from '@/lib/hooks/useTemplateSync'
 import { useStewardData } from '@/lib/hooks/useStewardData'
+import { getWeekStart, formatDate } from '@/lib/dates'
+import { addWeeks, subWeeks, addMonths, subMonths, format } from 'date-fns'
 import AppShell from '@/components/AppShell'
 import type { TabId } from '@/components/AppShell'
-import CategorySection from '@/components/CategorySection'
+import PeriodChecklist, { cycleValue } from '@/components/PeriodChecklist'
 import NotesTab from '@/components/NotesTab'
 import ReflectionLog from '@/components/ReflectionLog'
 import CellDetailModal from '@/components/CellDetailModal'
@@ -16,7 +18,6 @@ import AddBehaviorModal from '@/components/AddBehaviorModal'
 import EditBehaviorModal from '@/components/EditBehaviorModal'
 import EditCategoryModal from '@/components/EditCategoryModal'
 import SaveAsTemplateModal from '@/components/SaveAsTemplateModal'
-import { cycleValue } from '@/components/BehaviorRow'
 import type { EntryValue } from '@/lib/types'
 
 export default function HomePage() {
@@ -26,6 +27,41 @@ export default function HomePage() {
 
   const { categories, behaviors, archivedBehaviors, entries, comments, complianceMap, loading, refresh, upsertEntry, upsertComment } =
     useStewardData(user?.id)
+
+  // Period navigation offsets
+  const [weekOffset, setWeekOffset] = useState(0)
+  const [monthOffset, setMonthOffset] = useState(0)
+  const [quarterOffset, setQuarterOffset] = useState(0)
+
+  // Current period dates
+  const now = useMemo(() => new Date(), [])
+
+  const weekDate = useMemo(() => {
+    const base = getWeekStart(now)
+    return weekOffset === 0 ? base : addWeeks(base, weekOffset)
+  }, [now, weekOffset])
+
+  const monthDate = useMemo(() => {
+    const base = new Date(now.getFullYear(), now.getMonth(), 1)
+    return monthOffset === 0 ? base : addMonths(base, monthOffset)
+  }, [now, monthOffset])
+
+  const quarterDate = useMemo(() => {
+    const currentQ = Math.floor(now.getMonth() / 3)
+    const base = new Date(now.getFullYear(), currentQ * 3, 1)
+    return quarterOffset === 0 ? base : addMonths(base, quarterOffset * 3)
+  }, [now, quarterOffset])
+
+  // Period labels
+  const weekLabel = `Week of ${format(weekDate, 'MMM d, yyyy')}`
+  const monthLabel = format(monthDate, 'MMMM yyyy')
+  const qNum = Math.floor(monthDate.getMonth() / 3) + 1
+  const quarterLabel = `Q${Math.floor(quarterDate.getMonth() / 3) + 1} ${format(quarterDate, 'yyyy')}`
+
+  // Filter behaviors by frequency
+  const weeklyBehaviors = useMemo(() => behaviors.filter(b => b.frequency === 'weekly'), [behaviors])
+  const monthlyBehaviors = useMemo(() => behaviors.filter(b => b.frequency === 'monthly'), [behaviors])
+  const quarterlyBehaviors = useMemo(() => behaviors.filter(b => b.frequency === 'quarterly'), [behaviors])
 
   // Modal state
   const [cellDetailModal, setCellDetailModal] = useState<{
@@ -37,14 +73,14 @@ export default function HomePage() {
   const [editCategoryId, setEditCategoryId] = useState<string | null>(null)
   const [showSaveTemplate, setShowSaveTemplate] = useState(false)
 
-  const handleCellTap = useCallback(
+  const handleToggle = useCallback(
     (behaviorId: string, date: string, currentValue: EntryValue | null) => {
       upsertEntry(behaviorId, date, cycleValue(currentValue))
     },
     [upsertEntry]
   )
 
-  const handleCellLongPress = useCallback(
+  const handleComment = useCallback(
     (behaviorId: string, date: string) => {
       const allBeh = [...behaviors, ...archivedBehaviors]
       const behavior = allBeh.find(b => b.id === behaviorId)
@@ -66,20 +102,6 @@ export default function HomePage() {
     [cellDetailModal, entries, upsertEntry, upsertComment]
   )
 
-  const behaviorsByCategory = useMemo(() => {
-    const map = new Map<string, typeof behaviors>()
-    for (const cat of categories) map.set(cat.id, [])
-    for (const beh of behaviors) { const list = map.get(beh.category_id); if (list) list.push(beh) }
-    return map
-  }, [categories, behaviors])
-
-  const archivedByCategory = useMemo(() => {
-    const map = new Map<string, typeof archivedBehaviors>()
-    for (const cat of categories) map.set(cat.id, [])
-    for (const beh of archivedBehaviors) { const list = map.get(beh.category_id); if (list) list.push(beh) }
-    return map
-  }, [categories, archivedBehaviors])
-
   const allBehaviors = useMemo(() => [...behaviors, ...archivedBehaviors], [behaviors, archivedBehaviors])
   const editBehavior = editBehaviorId ? allBehaviors.find(b => b.id === editBehaviorId) : null
   const editCategory = editCategoryId ? categories.find(c => c.id === editCategoryId) : null
@@ -88,29 +110,81 @@ export default function HomePage() {
   return (
     <AppShell activeTab={activeTab} onTabChange={setActiveTab}>
       {activeTab === 'work' && (
-        <div>
+        <div className="pb-4">
           {loading ? (
             <div className="flex items-center justify-center h-48 text-sm text-gray-400">Loading...</div>
           ) : (
             <>
-              {categories.map(category => (
-                <CategorySection
-                  key={category.id}
-                  category={category}
-                  behaviors={behaviorsByCategory.get(category.id) ?? []}
-                  archivedBehaviors={archivedByCategory.get(category.id) ?? []}
+              {/* Weekly section */}
+              {weeklyBehaviors.length > 0 && (
+                <PeriodChecklist
+                  title="This Week"
+                  periodDate={weekDate}
+                  periodLabel={weekLabel}
+                  categories={categories}
+                  behaviors={weeklyBehaviors}
                   entries={entries}
                   comments={comments}
                   complianceMap={complianceMap}
-                  onCellTap={handleCellTap}
-                  onCellLongPress={handleCellLongPress}
-                  onAddBehavior={catId => setAddBehaviorCategoryId(catId)}
+                  onToggle={handleToggle}
+                  onComment={handleComment}
                   onEditBehavior={behId => setEditBehaviorId(behId)}
                   onEditCategory={catId => setEditCategoryId(catId)}
-                  onRefresh={refresh}
+                  onAddBehavior={catId => setAddBehaviorCategoryId(catId)}
+                  onPrev={() => setWeekOffset(o => o - 1)}
+                  onNext={() => setWeekOffset(o => o + 1)}
+                  onToday={() => setWeekOffset(0)}
+                  isCurrentPeriod={weekOffset === 0}
                 />
-              ))}
+              )}
 
+              {/* Monthly section */}
+              {monthlyBehaviors.length > 0 && (
+                <PeriodChecklist
+                  title="This Month"
+                  periodDate={monthDate}
+                  periodLabel={monthLabel}
+                  categories={categories}
+                  behaviors={monthlyBehaviors}
+                  entries={entries}
+                  comments={comments}
+                  complianceMap={complianceMap}
+                  onToggle={handleToggle}
+                  onComment={handleComment}
+                  onEditBehavior={behId => setEditBehaviorId(behId)}
+                  onEditCategory={catId => setEditCategoryId(catId)}
+                  onAddBehavior={catId => setAddBehaviorCategoryId(catId)}
+                  onPrev={() => setMonthOffset(o => o - 1)}
+                  onNext={() => setMonthOffset(o => o + 1)}
+                  onToday={() => setMonthOffset(0)}
+                  isCurrentPeriod={monthOffset === 0}
+                />
+              )}
+
+              {/* Quarterly section */}
+              {quarterlyBehaviors.length > 0 && (
+                <PeriodChecklist
+                  title="This Quarter"
+                  periodDate={quarterDate}
+                  periodLabel={quarterLabel}
+                  categories={categories}
+                  behaviors={quarterlyBehaviors}
+                  entries={entries}
+                  comments={comments}
+                  complianceMap={complianceMap}
+                  onToggle={handleToggle}
+                  onComment={handleComment}
+                  onEditBehavior={behId => setEditBehaviorId(behId)}
+                  onEditCategory={catId => setEditCategoryId(catId)}
+                  onAddBehavior={catId => setAddBehaviorCategoryId(catId)}
+                  onPrev={() => setQuarterOffset(o => o - 1)}
+                  onNext={() => setQuarterOffset(o => o + 1)}
+                  onToday={() => setQuarterOffset(0)}
+                  isCurrentPeriod={quarterOffset === 0}
+                />
+              )}
+
+              {/* Empty state or add category */}
               {categories.length === 0 && (
                 <div className="text-center py-16 px-4">
                   <p className="text-gray-500 text-sm mb-4">No categories yet. Add your first category to start tracking.</p>
@@ -156,7 +230,7 @@ export default function HomePage() {
         <AddCategoryModal userId={user.id} existingCount={categories.length} onSuccess={refresh} onClose={() => setShowAddCategory(false)} />
       )}
       {addBehaviorCategory && user && (
-        <AddBehaviorModal userId={user.id} categoryId={addBehaviorCategory.id} categoryName={addBehaviorCategory.name} existingCount={behaviorsByCategory.get(addBehaviorCategory.id)?.length ?? 0} onSuccess={refresh} onClose={() => setAddBehaviorCategoryId(null)} />
+        <AddBehaviorModal userId={user.id} categoryId={addBehaviorCategory.id} categoryName={addBehaviorCategory.name} existingCount={behaviors.filter(b => b.category_id === addBehaviorCategory.id).length} onSuccess={refresh} onClose={() => setAddBehaviorCategoryId(null)} />
       )}
       {editBehavior && (
         <EditBehaviorModal behavior={editBehavior} onSuccess={refresh} onClose={() => setEditBehaviorId(null)} />
@@ -165,13 +239,7 @@ export default function HomePage() {
         <EditCategoryModal category={editCategory} onSuccess={refresh} onClose={() => setEditCategoryId(null)} />
       )}
       {showSaveTemplate && user && (
-        <SaveAsTemplateModal
-          userId={user.id}
-          categories={categories}
-          behaviors={behaviors}
-          onSuccess={() => {}}
-          onClose={() => setShowSaveTemplate(false)}
-        />
+        <SaveAsTemplateModal userId={user.id} categories={categories} behaviors={behaviors} onSuccess={() => {}} onClose={() => setShowSaveTemplate(false)} />
       )}
     </AppShell>
   )
