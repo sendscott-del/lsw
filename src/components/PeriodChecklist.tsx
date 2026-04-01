@@ -9,6 +9,8 @@ interface PeriodChecklistProps {
   title: string
   periodDate: Date
   periodLabel: string
+  periodOffset: number // negative=past, 0=current, positive=future
+  frequency: 'weekly' | 'monthly' | 'quarterly'
   categories: Category[]
   behaviors: Behavior[]
   entries: Map<string, Entry>
@@ -22,7 +24,6 @@ interface PeriodChecklistProps {
   onPrev: () => void
   onNext: () => void
   onToday: () => void
-  isCurrentPeriod: boolean
 }
 
 function cycleValue(current: EntryValue | null): EntryValue | null {
@@ -32,13 +33,24 @@ function cycleValue(current: EntryValue | null): EntryValue | null {
   return null
 }
 
+const COMPLIANCE_LABELS: Record<string, string> = {
+  weekly: 'L12W',
+  monthly: 'L12M',
+  quarterly: 'L12Q',
+}
+
 export default function PeriodChecklist({
-  title, periodDate, periodLabel, categories, behaviors, entries, comments, complianceMap,
+  title, periodDate, periodLabel, periodOffset, frequency,
+  categories, behaviors, entries, comments, complianceMap,
   onToggle, onComment, onEditBehavior, onEditCategory, onAddBehavior,
-  onPrev, onNext, onToday, isCurrentPeriod,
+  onPrev, onNext, onToday,
 }: PeriodChecklistProps) {
   const [collapsed, setCollapsed] = useState(false)
   const dateStr = formatDate(periodDate)
+
+  const isCurrentPeriod = periodOffset === 0
+  const isPast = periodOffset < 0
+  const isFuture = periodOffset > 0
 
   // Count completion
   const applicable = behaviors.filter(b => !b.is_archived)
@@ -66,15 +78,11 @@ export default function PeriodChecklist({
       >
         <div className="flex items-center gap-2">
           {collapsed ? <ChevronRight size={18} className="text-gray-400" /> : <ChevronDown size={18} className="text-gray-400" />}
-          <div className="text-left">
-            <h2 className="text-sm md:text-base font-bold text-gray-800">{title}</h2>
-          </div>
+          <h2 className="text-sm md:text-base font-bold text-gray-800">{title}</h2>
         </div>
-        <div className="flex items-center gap-3">
-          <span className={`text-xs md:text-sm font-bold ${done === total && total > 0 ? 'text-green-600' : 'text-gray-400'}`}>
-            {done}/{total}
-          </span>
-        </div>
+        <span className={`text-xs md:text-sm font-bold ${done === total && total > 0 ? 'text-green-600' : 'text-gray-400'}`}>
+          {done}/{total}
+        </span>
       </button>
 
       {/* Period navigation */}
@@ -83,11 +91,20 @@ export default function PeriodChecklist({
           <button onClick={onPrev} className="p-1 text-gray-400 hover:text-gray-700">
             <ChevronLeft size={18} />
           </button>
-          <div className="text-center">
+          <div className="text-center flex items-center gap-2">
             <span className="text-xs md:text-sm font-medium text-gray-600">{periodLabel}</span>
+            {isCurrentPeriod && (
+              <span className="text-[10px] font-bold text-green-600 bg-green-50 px-1.5 py-0.5 rounded">Current</span>
+            )}
+            {isPast && (
+              <span className="text-[10px] font-bold text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">Past</span>
+            )}
+            {isFuture && (
+              <span className="text-[10px] font-bold text-blue-500 bg-blue-50 px-1.5 py-0.5 rounded">Future</span>
+            )}
             {!isCurrentPeriod && (
-              <button onClick={onToday} className="ml-2 text-[10px] text-blue-600 hover:underline">
-                Today
+              <button onClick={onToday} className="text-[10px] text-blue-600 hover:underline">
+                Current
               </button>
             )}
           </div>
@@ -124,9 +141,11 @@ export default function PeriodChecklist({
                   const key = `${beh.id}_${dateStr}`
                   const entry = entries.get(key)
                   const comment = comments.get(key)
+                  const hasComment = !!comment
                   const value = entry?.value ?? null
                   const pct = complianceMap.get(beh.id)
                   const pctRounded = pct != null ? Math.round(pct) : null
+                  const compLabel = COMPLIANCE_LABELS[frequency]
 
                   return (
                     <div key={beh.id} className="flex items-center gap-3 px-4 py-3 md:py-3.5 border-b border-gray-100 bg-white">
@@ -151,28 +170,27 @@ export default function PeriodChecklist({
                           {beh.name}
                         </p>
                         <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-[10px] text-gray-400">
-                            {beh.frequency === 'weekly' ? 'Wkly' : beh.frequency === 'monthly' ? 'Mthly' : 'Qtrly'}
-                            {beh.interval > 1 && ` ×${beh.interval}`}
-                          </span>
                           {pctRounded != null && (
                             <span className={`text-[10px] font-medium ${pctRounded >= 80 ? 'text-green-600' : pctRounded >= 50 ? 'text-amber-600' : 'text-red-500'}`}>
-                              {pctRounded}%
+                              {pctRounded}% {compLabel}
                             </span>
-                          )}
-                          {comment && (
-                            <span className="text-[10px] text-blue-500">💬</span>
                           )}
                         </div>
                       </div>
 
-                      {/* Actions */}
+                      {/* Comment button — filled when has comment */}
                       <button
                         onClick={() => onComment(beh.id, dateStr)}
-                        className="p-1.5 text-gray-300 hover:text-blue-500 shrink-0"
+                        className={`p-1.5 shrink-0 ${hasComment ? 'text-blue-500' : 'text-gray-300 hover:text-blue-400'}`}
                       >
-                        <MessageSquare size={16} />
+                        {hasComment ? (
+                          <MessageSquare size={16} fill="currentColor" />
+                        ) : (
+                          <MessageSquare size={16} />
+                        )}
                       </button>
+
+                      {/* Edit button */}
                       <button
                         onClick={() => onEditBehavior(beh.id)}
                         className="p-1.5 text-gray-300 hover:text-gray-500 shrink-0"

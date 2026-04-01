@@ -121,6 +121,8 @@ export default function HomePage() {
                   title="This Week"
                   periodDate={weekDate}
                   periodLabel={weekLabel}
+                  periodOffset={weekOffset}
+                  frequency="weekly"
                   categories={categories}
                   behaviors={weeklyBehaviors}
                   entries={entries}
@@ -134,7 +136,6 @@ export default function HomePage() {
                   onPrev={() => setWeekOffset(o => o - 1)}
                   onNext={() => setWeekOffset(o => o + 1)}
                   onToday={() => setWeekOffset(0)}
-                  isCurrentPeriod={weekOffset === 0}
                 />
               )}
 
@@ -144,6 +145,8 @@ export default function HomePage() {
                   title="This Month"
                   periodDate={monthDate}
                   periodLabel={monthLabel}
+                  periodOffset={monthOffset}
+                  frequency="monthly"
                   categories={categories}
                   behaviors={monthlyBehaviors}
                   entries={entries}
@@ -157,7 +160,6 @@ export default function HomePage() {
                   onPrev={() => setMonthOffset(o => o - 1)}
                   onNext={() => setMonthOffset(o => o + 1)}
                   onToday={() => setMonthOffset(0)}
-                  isCurrentPeriod={monthOffset === 0}
                 />
               )}
 
@@ -167,6 +169,8 @@ export default function HomePage() {
                   title="This Quarter"
                   periodDate={quarterDate}
                   periodLabel={quarterLabel}
+                  periodOffset={quarterOffset}
+                  frequency="quarterly"
                   categories={categories}
                   behaviors={quarterlyBehaviors}
                   entries={entries}
@@ -180,7 +184,6 @@ export default function HomePage() {
                   onPrev={() => setQuarterOffset(o => o - 1)}
                   onNext={() => setQuarterOffset(o => o + 1)}
                   onToday={() => setQuarterOffset(0)}
-                  isCurrentPeriod={quarterOffset === 0}
                 />
               )}
 
