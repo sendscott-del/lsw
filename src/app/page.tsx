@@ -1,9 +1,8 @@
 'use client'
 
 import { useState, useMemo, useCallback } from 'react'
-import { Plus } from 'lucide-react'
+import { Plus, RefreshCw } from 'lucide-react'
 import { useAuth } from '@/lib/hooks/useAuth'
-import { useTemplateSync } from '@/lib/hooks/useTemplateSync'
 import { useStewardData } from '@/lib/hooks/useStewardData'
 import { getWeekStart, formatDate } from '@/lib/dates'
 import { addWeeks, subWeeks, addMonths, subMonths, format } from 'date-fns'
@@ -17,13 +16,13 @@ import AddCategoryModal from '@/components/AddCategoryModal'
 import AddBehaviorModal from '@/components/AddBehaviorModal'
 import EditBehaviorModal from '@/components/EditBehaviorModal'
 import EditCategoryModal from '@/components/EditCategoryModal'
-import SaveAsTemplateModal from '@/components/SaveAsTemplateModal'
+import CallingPicker from '@/components/CallingPicker'
 import type { EntryValue } from '@/lib/types'
 
 export default function HomePage() {
   const { user, isAdmin } = useAuth()
-  useTemplateSync(user?.id)
   const [activeTab, setActiveTab] = useState<TabId>('work')
+  const [showCallingPicker, setShowCallingPicker] = useState(false)
 
   const { categories, behaviors, archivedBehaviors, entries, comments, complianceMap, loading, refresh, upsertEntry, upsertComment } =
     useStewardData(user?.id)
@@ -71,7 +70,6 @@ export default function HomePage() {
   const [addBehaviorCategoryId, setAddBehaviorCategoryId] = useState<string | null>(null)
   const [editBehaviorId, setEditBehaviorId] = useState<string | null>(null)
   const [editCategoryId, setEditCategoryId] = useState<string | null>(null)
-  const [showSaveTemplate, setShowSaveTemplate] = useState(false)
 
   const handleToggle = useCallback(
     (behaviorId: string, date: string, currentValue: EntryValue | null) => {
@@ -187,30 +185,39 @@ export default function HomePage() {
                 />
               )}
 
-              {/* Empty state or add category */}
-              {categories.length === 0 && (
-                <div className="text-center py-16 px-4">
-                  <p className="text-gray-500 text-sm mb-4">No categories yet. Add your first category to start tracking.</p>
-                </div>
+              {/* Empty state — show calling picker */}
+              {categories.length === 0 && !showCallingPicker && (
+                <CallingPicker userId={user!.id} hasExistingData={false} onApplied={refresh} />
               )}
 
-              <div className="px-4 py-4 space-y-3">
-                <button
-                  onClick={() => setShowAddCategory(true)}
-                  className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-500 hover:border-blue-400 hover:text-blue-600"
-                >
-                  <Plus size={16} />
-                  Add Category
-                </button>
-                {isAdmin && categories.length > 0 && (
+              {/* Show calling picker when changing */}
+              {showCallingPicker && (
+                <CallingPicker
+                  userId={user!.id}
+                  hasExistingData={categories.length > 0}
+                  onApplied={() => { setShowCallingPicker(false); refresh() }}
+                  onCancel={() => setShowCallingPicker(false)}
+                />
+              )}
+
+              {categories.length > 0 && !showCallingPicker && (
+                <div className="px-4 py-4 space-y-3">
                   <button
-                    onClick={() => setShowSaveTemplate(true)}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-600 font-medium hover:bg-blue-100"
+                    onClick={() => setShowAddCategory(true)}
+                    className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-500 hover:border-blue-400 hover:text-blue-600"
                   >
-                    Save as Template
+                    <Plus size={16} />
+                    Add Category
                   </button>
-                )}
-              </div>
+                  <button
+                    onClick={() => setShowCallingPicker(true)}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-500 hover:bg-gray-100"
+                  >
+                    <RefreshCw size={14} />
+                    Change Calling
+                  </button>
+                </div>
+              )}
             </>
           )}
         </div>
@@ -240,9 +247,6 @@ export default function HomePage() {
       )}
       {editCategory && (
         <EditCategoryModal category={editCategory} onSuccess={refresh} onClose={() => setEditCategoryId(null)} />
-      )}
-      {showSaveTemplate && user && (
-        <SaveAsTemplateModal userId={user.id} categories={categories} behaviors={behaviors} onSuccess={() => {}} onClose={() => setShowSaveTemplate(false)} />
       )}
     </AppShell>
   )

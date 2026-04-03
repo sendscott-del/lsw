@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.3.0'
+export const APP_VERSION = '2.4.0'
 
 export interface ChangelogEntry {
   version: string
@@ -8,6 +8,16 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.4.0',
+    date: '2026-04-02',
+    enhancements: [
+      'Choose your Calling — new users see a calling picker (Stake President, First Counselor, Second Counselor, High Councilor) that sets up their stewardship items automatically',
+      'Change Calling — existing users can switch to a different template from the Work tab',
+      'Simplified admin page — just template editing, removed groups and assignments',
+    ],
+    bugFixes: [],
+  },
   {
     version: '2.3.0',
     date: '2026-04-02',
