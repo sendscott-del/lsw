@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.1.0'
+export const APP_VERSION = '2.2.0'
 
 export interface ChangelogEntry {
   version: string
@@ -8,6 +8,14 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.2.0',
+    date: '2026-04-02',
+    enhancements: [
+      'Add to Calendar — tap the calendar icon on any task row to add it to Google Calendar, Outlook, or download an .ics file',
+    ],
+    bugFixes: [],
+  },
   {
     version: '2.1.0',
     date: '2026-03-31',

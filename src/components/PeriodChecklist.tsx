@@ -1,9 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronDown, ChevronRight, ChevronLeft, ChevronRight as ChevronRightIcon, Plus, Pencil, MessageSquare, Check, X, Minus } from 'lucide-react'
+import { ChevronDown, ChevronRight, ChevronLeft, ChevronRight as ChevronRightIcon, Plus, Pencil, MessageSquare, Check, X, Minus, CalendarPlus } from 'lucide-react'
 import type { Category, Behavior, Entry, CellComment, EntryValue } from '@/lib/types'
 import { formatDate } from '@/lib/dates'
+import CalendarMenu from '@/components/CalendarMenu'
 
 interface PeriodChecklistProps {
   title: string
@@ -46,6 +47,7 @@ export default function PeriodChecklist({
   onPrev, onNext, onToday,
 }: PeriodChecklistProps) {
   const [collapsed, setCollapsed] = useState(false)
+  const [calendarMenuId, setCalendarMenuId] = useState<string | null>(null)
   const dateStr = formatDate(periodDate)
 
   const isCurrentPeriod = periodOffset === 0
@@ -186,6 +188,24 @@ export default function PeriodChecklist({
                           <MessageSquare size={16} />
                         )}
                       </button>
+
+                      {/* Calendar button */}
+                      <div className="relative shrink-0">
+                        <button
+                          onClick={() => setCalendarMenuId(calendarMenuId === beh.id ? null : beh.id)}
+                          className="p-1.5 text-gray-300 hover:text-blue-500"
+                        >
+                          <CalendarPlus size={15} />
+                        </button>
+                        {calendarMenuId === beh.id && (
+                          <CalendarMenu
+                            title={beh.name}
+                            date={periodDate}
+                            frequency={frequency}
+                            onClose={() => setCalendarMenuId(null)}
+                          />
+                        )}
+                      </div>
 
                       {/* Edit button */}
                       <button
