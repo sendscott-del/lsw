@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.2.0'
+export const APP_VERSION = '2.3.0'
 
 export interface ChangelogEntry {
   version: string
@@ -8,6 +8,16 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.3.0',
+    date: '2026-04-02',
+    enhancements: [
+      'Suggested templates — one-click creation of Handbook Ch. 6 templates for Stake President, First Counselor, Second Counselor, and High Councilor',
+      'Info buttons — tap the (i) icon on any behavior to see handbook references, scriptures, and guidance',
+      'Templates now support interval (e.g., every 2 weeks) and info text fields',
+    ],
+    bugFixes: [],
+  },
   {
     version: '2.2.0',
     date: '2026-04-02',

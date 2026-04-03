@@ -18,6 +18,7 @@ export interface Behavior {
   anchor_date: string | null // YYYY-MM-DD, used for "every N weeks" to know which weeks
   is_archived: boolean
   sort_order: number
+  info_text: string | null // handbook/scripture reference for info button
 }
 
 export interface Entry {
@@ -76,7 +77,9 @@ export interface TemplateBehavior {
   category_id: string
   name: string
   frequency: Frequency
+  interval: number // every N periods (default 1); e.g., 2 for "every 2 weeks"
   sort_order: number
+  info_text: string | null // handbook/scripture reference for info button
 }
 
 export interface TemplateAssignment {

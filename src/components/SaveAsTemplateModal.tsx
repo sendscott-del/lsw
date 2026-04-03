@@ -56,6 +56,8 @@ export default function SaveAsTemplateModal({
             category_id: newCat.id,
             name: b.name,
             frequency: b.frequency,
+            interval: b.interval ?? 1,
+            info_text: b.info_text ?? null,
             sort_order: b.sort_order,
           }))
         )

@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronLeft, Plus, X, Trash2, Users, FileText, Link2 } from 'lucide-react'
+import { ChevronLeft, Plus, X, Trash2, Users, FileText, Link2, Sparkles } from 'lucide-react'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
+import { SEED_TEMPLATES } from '@/constants/seedTemplates'
 import type {
   Template, TemplateCategory, TemplateBehavior,
   UserGroup, GroupMember, TemplateAssignment, Frequency,
@@ -112,11 +113,63 @@ function TemplatesSection({ userId }: { userId: string }) {
     fetch()
   }
 
+  const [seeding, setSeeding] = useState(false)
+
+  async function handleSeedTemplates() {
+    if (!confirm('This will create the suggested Handbook-based templates (Stake President, First Counselor, Second Counselor, High Councilor). Continue?')) return
+    setSeeding(true)
+    for (const seed of SEED_TEMPLATES) {
+      // Check if template with this name already exists
+      const { data: existing } = await supabase.from('steward_templates').select('id').eq('name', seed.name).limit(1)
+      if (existing && existing.length > 0) continue
+
+      const { data: template } = await supabase
+        .from('steward_templates')
+        .insert({ name: seed.name, created_by: userId })
+        .select('id')
+        .single()
+      if (!template) continue
+
+      for (let ci = 0; ci < seed.categories.length; ci++) {
+        const cat = seed.categories[ci]
+        const { data: newCat } = await supabase
+          .from('steward_template_categories')
+          .insert({ template_id: template.id, name: cat.name, sort_order: ci })
+          .select('id')
+          .single()
+        if (!newCat) continue
+
+        await supabase.from('steward_template_behaviors').insert(
+          cat.behaviors.map((b, bi) => ({
+            category_id: newCat.id,
+            name: b.name,
+            frequency: b.frequency,
+            interval: b.interval,
+            info_text: b.info_text,
+            sort_order: bi,
+          }))
+        )
+      }
+    }
+    setSeeding(false)
+    fetch()
+  }
+
   return (
     <div className="space-y-4">
       <p className="text-xs text-gray-400 px-1">
         Create templates from the main Work tab using &quot;Save as Template&quot;. Edit or delete them here.
       </p>
+
+      {/* Seed suggested templates */}
+      <button
+        onClick={handleSeedTemplates}
+        disabled={seeding}
+        className="w-full flex items-center justify-center gap-2 py-2.5 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-700 font-medium hover:bg-amber-100 disabled:opacity-50"
+      >
+        <Sparkles size={16} />
+        {seeding ? 'Creating...' : 'Create Suggested Templates (Handbook Ch. 6)'}
+      </button>
 
       {/* List */}
       {loading ? (
@@ -225,7 +278,9 @@ function TemplateEditor({ templateId }: { templateId: string }) {
               <div key={beh.id} className="flex items-center justify-between py-1.5 border-b border-gray-50 last:border-0">
                 <div>
                   <span className="text-sm text-gray-700">{beh.name}</span>
-                  <span className="ml-2 text-[10px] text-gray-400">{freqLabel(beh.frequency ?? 'weekly')}</span>
+                  <span className="ml-2 text-[10px] text-gray-400">
+                    {(beh.interval ?? 1) > 1 ? `Every ${beh.interval} ${beh.frequency === 'weekly' ? 'wks' : beh.frequency === 'monthly' ? 'mo' : 'qtrs'}` : freqLabel(beh.frequency ?? 'weekly')}
+                  </span>
                 </div>
                 <button onClick={() => handleDeleteBehavior(beh.id)} className="p-0.5 text-gray-300 hover:text-red-500">
                   <X size={12} />

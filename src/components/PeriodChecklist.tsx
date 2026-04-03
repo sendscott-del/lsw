@@ -1,10 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronDown, ChevronRight, ChevronLeft, ChevronRight as ChevronRightIcon, Plus, Pencil, MessageSquare, Check, X, Minus, CalendarPlus } from 'lucide-react'
+import { ChevronDown, ChevronRight, ChevronLeft, ChevronRight as ChevronRightIcon, Plus, Pencil, MessageSquare, Check, X, Minus, CalendarPlus, Info } from 'lucide-react'
 import type { Category, Behavior, Entry, CellComment, EntryValue } from '@/lib/types'
 import { formatDate } from '@/lib/dates'
 import CalendarMenu from '@/components/CalendarMenu'
+import InfoModal from '@/components/InfoModal'
 
 interface PeriodChecklistProps {
   title: string
@@ -48,6 +49,7 @@ export default function PeriodChecklist({
 }: PeriodChecklistProps) {
   const [collapsed, setCollapsed] = useState(false)
   const [calendarMenuId, setCalendarMenuId] = useState<string | null>(null)
+  const [infoModal, setInfoModal] = useState<{ name: string; text: string } | null>(null)
   const dateStr = formatDate(periodDate)
 
   const isCurrentPeriod = periodOffset === 0
@@ -207,6 +209,16 @@ export default function PeriodChecklist({
                         )}
                       </div>
 
+                      {/* Info button — only if info_text exists */}
+                      {beh.info_text && (
+                        <button
+                          onClick={() => setInfoModal({ name: beh.name, text: beh.info_text! })}
+                          className="p-1.5 text-gray-300 hover:text-blue-500 shrink-0"
+                        >
+                          <Info size={15} />
+                        </button>
+                      )}
+
                       {/* Edit button */}
                       <button
                         onClick={() => onEditBehavior(beh.id)}
@@ -221,6 +233,14 @@ export default function PeriodChecklist({
             )
           })}
         </div>
+      )}
+
+      {infoModal && (
+        <InfoModal
+          title={infoModal.name}
+          infoText={infoModal.text}
+          onClose={() => setInfoModal(null)}
+        />
       )}
     </div>
   )
