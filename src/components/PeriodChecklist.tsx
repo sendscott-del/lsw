@@ -124,7 +124,8 @@ export default function PeriodChecklist({
         <div>
           {categories.map(cat => {
             const catBehaviors = behaviorsByCategory.get(cat.id) ?? []
-            if (catBehaviors.length === 0) return null
+            // Show empty categories only in the first section (weekly) so user can add behaviors
+            if (catBehaviors.length === 0 && frequency !== 'weekly') return null
 
             return (
               <div key={cat.id}>
@@ -140,6 +141,16 @@ export default function PeriodChecklist({
                     </button>
                   </div>
                 </div>
+
+                {/* Empty category hint */}
+                {catBehaviors.length === 0 && (
+                  <button
+                    onClick={() => onAddBehavior(cat.id)}
+                    className="w-full px-4 py-3 text-xs text-gray-400 bg-white border-b border-gray-100 hover:text-blue-500 hover:bg-blue-50 text-left"
+                  >
+                    + Add a behavior to this category
+                  </button>
+                )}
 
                 {/* Behavior items */}
                 {catBehaviors.map(beh => {
