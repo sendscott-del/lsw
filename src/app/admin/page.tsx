@@ -42,8 +42,183 @@ export default function AdminPage() {
         <h1 className="text-lg font-bold text-gray-900">Admin — Templates</h1>
       </header>
 
-      <div className="max-w-lg mx-auto p-4">
+      <div className="max-w-lg mx-auto p-4 space-y-8">
+        <PendingUsersSection />
         <TemplatesSection userId={user.id} />
+      </div>
+    </div>
+  )
+}
+
+// ─── Pending Users Section ───
+
+interface UserProfile {
+  id: string
+  full_name: string | null
+  email: string | null
+  status: string
+  selected_template_id: string | null
+  selected_template_name: string | null
+  created_at: string
+}
+
+function PendingUsersSection() {
+  const [users, setUsers] = useState<UserProfile[]>([])
+  const [templates, setTemplates] = useState<Template[]>([])
+  const [loading, setLoading] = useState(true)
+  const [changingTemplate, setChangingTemplate] = useState<string | null>(null)
+
+  const fetchUsers = useCallback(async () => {
+    const [usersRes, templatesRes] = await Promise.all([
+      supabase.from('steward_user_profiles').select('*').eq('status', 'pending').order('created_at'),
+      supabase.from('steward_templates').select('*').order('name'),
+    ])
+    setUsers((usersRes.data ?? []) as UserProfile[])
+    setTemplates((templatesRes.data ?? []) as Template[])
+    setLoading(false)
+  }, [])
+
+  useEffect(() => { fetchUsers() }, [fetchUsers])
+
+  async function handleApprove(userProfile: UserProfile) {
+    if (!userProfile.selected_template_id) {
+      alert('No calling selected. Please assign a calling first.')
+      return
+    }
+
+    // Apply the template to the user
+    const templateId = userProfile.selected_template_id
+    const userId = userProfile.id
+
+    // Clear any existing data
+    await supabase.from('steward_behaviors').delete().eq('user_id', userId)
+    await supabase.from('steward_categories').delete().eq('user_id', userId)
+
+    // Fetch and apply template
+    const { data: tCats } = await supabase
+      .from('steward_template_categories')
+      .select('*')
+      .eq('template_id', templateId)
+      .order('sort_order')
+
+    if (tCats) {
+      for (const tCat of tCats as TemplateCategory[]) {
+        const { data: newCat } = await supabase
+          .from('steward_categories')
+          .insert({ user_id: userId, name: tCat.name, sort_order: tCat.sort_order })
+          .select('id')
+          .single()
+
+        if (!newCat) continue
+
+        const { data: tBehs } = await supabase
+          .from('steward_template_behaviors')
+          .select('*')
+          .eq('category_id', tCat.id)
+          .order('sort_order')
+
+        if (tBehs && tBehs.length > 0) {
+          await supabase.from('steward_behaviors').insert(
+            (tBehs as TemplateBehavior[]).map(b => ({
+              user_id: userId,
+              category_id: newCat.id,
+              name: b.name,
+              frequency: b.frequency ?? 'weekly',
+              interval: b.interval ?? 1,
+              info_text: b.info_text || null,
+              sort_order: b.sort_order,
+            }))
+          )
+        }
+      }
+    }
+
+    // Mark as approved
+    await supabase.from('steward_user_profiles').update({
+      status: 'approved',
+      approved_at: new Date().toISOString(),
+    }).eq('id', userId)
+
+    fetchUsers()
+  }
+
+  async function handleReject(userId: string) {
+    if (!confirm('Reject this user?')) return
+    await supabase.from('steward_user_profiles').update({ status: 'rejected' }).eq('id', userId)
+    fetchUsers()
+  }
+
+  async function handleChangeCalling(userId: string, templateId: string, templateName: string) {
+    await supabase.from('steward_user_profiles').update({
+      selected_template_id: templateId,
+      selected_template_name: templateName,
+    }).eq('id', userId)
+    setChangingTemplate(null)
+    fetchUsers()
+  }
+
+  if (loading) return null
+  if (users.length === 0) return null
+
+  return (
+    <div>
+      <h2 className="text-sm font-bold text-gray-700 mb-3">Pending Approvals ({users.length})</h2>
+      <div className="space-y-2">
+        {users.map(u => (
+          <div key={u.id} className="bg-white rounded-xl border border-amber-200 shadow-sm p-4">
+            <div className="flex items-start justify-between mb-2">
+              <div>
+                <div className="text-sm font-semibold text-gray-800">{u.full_name || 'Unknown'}</div>
+                <div className="text-xs text-gray-400">{u.email}</div>
+              </div>
+              <div className="text-[10px] text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full font-medium">
+                Pending
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-xs text-gray-500">Calling:</span>
+              <span className="text-xs font-medium text-gray-700">{u.selected_template_name || 'None selected'}</span>
+              <button
+                onClick={() => setChangingTemplate(changingTemplate === u.id ? null : u.id)}
+                className="text-[10px] text-blue-600 hover:underline"
+              >
+                Change
+              </button>
+            </div>
+
+            {changingTemplate === u.id && (
+              <div className="mb-3 space-y-1">
+                {templates.map(t => (
+                  <button
+                    key={t.id}
+                    onClick={() => handleChangeCalling(u.id, t.id, t.name)}
+                    className={`w-full text-left px-3 py-2 rounded-lg text-xs transition ${
+                      t.id === u.selected_template_id ? 'bg-blue-50 border border-blue-200 text-blue-700 font-medium' : 'bg-gray-50 hover:bg-gray-100 text-gray-700'
+                    }`}
+                  >
+                    {t.name}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleApprove(u)}
+                className="flex-1 py-2 bg-green-600 text-white rounded-lg text-xs font-medium hover:bg-green-700"
+              >
+                Approve
+              </button>
+              <button
+                onClick={() => handleReject(u.id)}
+                className="px-4 py-2 text-red-600 bg-red-50 rounded-lg text-xs font-medium hover:bg-red-100"
+              >
+                Reject
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   )

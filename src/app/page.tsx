@@ -18,10 +18,12 @@ import EditBehaviorModal from '@/components/EditBehaviorModal'
 import EditCategoryModal from '@/components/EditCategoryModal'
 import CallingPicker from '@/components/CallingPicker'
 import SaveAsTemplateModal from '@/components/SaveAsTemplateModal'
+import NewUserSetup from '@/components/NewUserSetup'
+import PendingApproval from '@/components/PendingApproval'
 import type { EntryValue } from '@/lib/types'
 
 export default function HomePage() {
-  const { user, isAdmin } = useAuth()
+  const { user, isAdmin, userStatus, statusLoading, signOut, refreshStatus } = useAuth()
   const [activeTab, setActiveTab] = useState<TabId>('work')
   const [showCallingPicker, setShowCallingPicker] = useState(false)
   const [showSaveTemplate, setShowSaveTemplate] = useState(false)
@@ -106,6 +108,37 @@ export default function HomePage() {
   const editBehavior = editBehaviorId ? allBehaviors.find(b => b.id === editBehaviorId) : null
   const editCategory = editCategoryId ? categories.find(c => c.id === editCategoryId) : null
   const addBehaviorCategory = addBehaviorCategoryId ? categories.find(c => c.id === addBehaviorCategoryId) : null
+
+  // New user — needs to pick a calling and wait for approval
+  if (!isAdmin && userStatus === 'new' && user) {
+    return (
+      <AppShell activeTab={activeTab} onTabChange={setActiveTab}>
+        <NewUserSetup
+          userId={user.id}
+          userEmail={user.email ?? ''}
+          onSubmitted={refreshStatus}
+        />
+      </AppShell>
+    )
+  }
+
+  // Pending approval
+  if (!isAdmin && userStatus === 'pending') {
+    return <PendingApproval onRefresh={refreshStatus} onSignOut={signOut} />
+  }
+
+  // Rejected
+  if (!isAdmin && userStatus === 'rejected') {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4 bg-gray-50">
+        <div className="text-center max-w-sm">
+          <h2 className="text-lg font-bold text-gray-800 mb-2">Access Denied</h2>
+          <p className="text-sm text-gray-500 mb-4">Your access request was not approved. Please contact your stake president.</p>
+          <button onClick={signOut} className="text-sm text-blue-600 hover:underline">Sign Out</button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <AppShell activeTab={activeTab} onTabChange={setActiveTab}>
