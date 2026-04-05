@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronRight, ChevronLeft, ChevronRight as ChevronRightIcon, Plus, Pencil, MessageSquare, Check, X, Minus, CalendarPlus, Info } from 'lucide-react'
 import type { Category, Behavior, Entry, CellComment, EntryValue } from '@/lib/types'
-import { formatDate } from '@/lib/dates'
+import { formatDate, isDueThisPeriod } from '@/lib/dates'
 import CalendarMenu from '@/components/CalendarMenu'
 import InfoModal from '@/components/InfoModal'
 
@@ -56,8 +56,13 @@ export default function PeriodChecklist({
   const isPast = periodOffset < 0
   const isFuture = periodOffset > 0
 
+  // Filter to only behaviors due this period (respects interval)
+  const dueBehaviors = behaviors.filter(b =>
+    !b.is_archived && isDueThisPeriod(periodDate, frequency, b.interval ?? 1, b.anchor_date ?? null)
+  )
+
   // Count completion
-  const applicable = behaviors.filter(b => !b.is_archived)
+  const applicable = dueBehaviors
   const done = applicable.filter(b => {
     const entry = entries.get(`${b.id}_${dateStr}`)
     return entry?.value === 'y' || entry?.value === 'na'
@@ -67,8 +72,7 @@ export default function PeriodChecklist({
   // Group behaviors by category
   const behaviorsByCategory = new Map<string, Behavior[]>()
   for (const cat of categories) behaviorsByCategory.set(cat.id, [])
-  for (const beh of behaviors) {
-    if (beh.is_archived) continue
+  for (const beh of dueBehaviors) {
     const list = behaviorsByCategory.get(beh.category_id)
     if (list) list.push(beh)
   }

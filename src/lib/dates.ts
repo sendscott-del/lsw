@@ -60,6 +60,36 @@ export function getPeriodCells(
   return getQuarterlyCells(offset, count, interval)
 }
 
+// Check if a behavior with a given interval is due in a specific period
+export function isDueThisPeriod(
+  periodDate: Date,
+  frequency: Frequency,
+  interval: number,
+  anchorDate: string | null
+): boolean {
+  if (interval <= 1) return true // every occurrence
+
+  if (frequency === 'weekly') {
+    if (!anchorDate) return true // no anchor = can't calculate, show it
+    const anchor = getWeekStart(new Date(anchorDate + 'T00:00:00'))
+    const period = getWeekStart(periodDate)
+    const weeksDiff = differenceInWeeks(period, anchor)
+    return weeksDiff >= 0 && weeksDiff % interval === 0
+  }
+
+  if (frequency === 'monthly') {
+    const now = new Date()
+    const baseMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+    const periodMonth = new Date(periodDate.getFullYear(), periodDate.getMonth(), 1)
+    const monthsDiff = (periodMonth.getFullYear() - baseMonth.getFullYear()) * 12 +
+      (periodMonth.getMonth() - baseMonth.getMonth())
+    return ((monthsDiff % interval) + interval) % interval === 0
+  }
+
+  // Quarterly with interval > 1 is rare, just show it
+  return true
+}
+
 export function getDefaultCount(frequency: Frequency): number {
   if (frequency === 'weekly') return 4
   if (frequency === 'monthly') return 12
