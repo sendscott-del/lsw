@@ -73,7 +73,7 @@ function TemplatesSection({ userId }: { userId: string }) {
 
   async function handleEdit(template: Template) {
     // Load template into user's work tab categories/behaviors, then navigate there
-    if (!confirm(`This will replace your current work tab with the "${template.name}" template for editing. Your current categories and behaviors will be replaced. Continue?`)) return
+    if (!confirm(`This will load "${template.name}" into your work tab for editing. Your current categories and behaviors will be replaced, but the original template will stay intact. Continue?`)) return
 
     // Clear existing user categories/behaviors
     await supabase.from('steward_behaviors').delete().eq('user_id', userId)
@@ -118,9 +118,7 @@ function TemplatesSection({ userId }: { userId: string }) {
       }
     }
 
-    // Delete the old template (user will re-save after editing)
-    await supabase.from('steward_templates').delete().eq('id', template.id)
-
+    // Original template stays intact — Save as Template creates a new one
     // Navigate to work tab
     router.push('/')
   }
