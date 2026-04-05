@@ -44,6 +44,7 @@ export default function AdminPage() {
 
       <div className="max-w-lg mx-auto p-4 space-y-8">
         <PendingUsersSection />
+        <AllUsersSection />
         <TemplatesSection userId={user.id} />
       </div>
     </div>
@@ -215,6 +216,159 @@ function PendingUsersSection() {
                 className="px-4 py-2 text-red-600 bg-red-50 rounded-lg text-xs font-medium hover:bg-red-100"
               >
                 Reject
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ─── All Users Section ───
+
+function AllUsersSection() {
+  const [users, setUsers] = useState<UserProfile[]>([])
+  const [templates, setTemplates] = useState<Template[]>([])
+  const [loading, setLoading] = useState(true)
+  const [changingTemplate, setChangingTemplate] = useState<string | null>(null)
+  const [reassigning, setReassigning] = useState<string | null>(null)
+
+  const fetchUsers = useCallback(async () => {
+    const [usersRes, templatesRes] = await Promise.all([
+      supabase.from('steward_user_profiles').select('*').eq('status', 'approved').order('full_name'),
+      supabase.from('steward_templates').select('*').order('name'),
+    ])
+    setUsers((usersRes.data ?? []) as UserProfile[])
+    setTemplates((templatesRes.data ?? []) as Template[])
+    setLoading(false)
+  }, [])
+
+  useEffect(() => { fetchUsers() }, [fetchUsers])
+
+  async function handleChangeCalling(userId: string, template: Template) {
+    setReassigning(userId)
+
+    // Clear existing data
+    await supabase.from('steward_behaviors').delete().eq('user_id', userId)
+    await supabase.from('steward_categories').delete().eq('user_id', userId)
+
+    // Apply new template
+    const { data: tCats } = await supabase
+      .from('steward_template_categories')
+      .select('*')
+      .eq('template_id', template.id)
+      .order('sort_order')
+
+    if (tCats) {
+      for (const tCat of tCats as TemplateCategory[]) {
+        const { data: newCat } = await supabase
+          .from('steward_categories')
+          .insert({ user_id: userId, name: tCat.name, sort_order: tCat.sort_order })
+          .select('id')
+          .single()
+
+        if (!newCat) continue
+
+        const { data: tBehs } = await supabase
+          .from('steward_template_behaviors')
+          .select('*')
+          .eq('category_id', tCat.id)
+          .order('sort_order')
+
+        if (tBehs && tBehs.length > 0) {
+          await supabase.from('steward_behaviors').insert(
+            (tBehs as TemplateBehavior[]).map(b => ({
+              user_id: userId,
+              category_id: newCat.id,
+              name: b.name,
+              frequency: b.frequency ?? 'weekly',
+              interval: b.interval ?? 1,
+              info_text: b.info_text || null,
+              sort_order: b.sort_order,
+            }))
+          )
+        }
+      }
+    }
+
+    // Update profile
+    await supabase.from('steward_user_profiles').update({
+      selected_template_id: template.id,
+      selected_template_name: template.name,
+    }).eq('id', userId)
+
+    setReassigning(null)
+    setChangingTemplate(null)
+    fetchUsers()
+  }
+
+  async function handleRemoveAccess(userId: string, name: string) {
+    if (!confirm(`Remove access for ${name}? Their data will be preserved but they won't be able to log in.`)) return
+
+    await supabase.from('steward_user_profiles').update({ status: 'rejected' }).eq('id', userId)
+    fetchUsers()
+  }
+
+  if (loading) return null
+  if (users.length === 0) return null
+
+  return (
+    <div>
+      <h2 className="text-sm font-bold text-gray-700 mb-3">Active Users ({users.length})</h2>
+      <div className="space-y-2">
+        {users.map(u => (
+          <div key={u.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+            <div className="flex items-start justify-between mb-1">
+              <div>
+                <div className="text-sm font-semibold text-gray-800">{u.full_name || 'Unknown'}</div>
+                <div className="text-xs text-gray-400">{u.email}</div>
+              </div>
+              <div className="text-[10px] text-green-600 bg-green-50 px-2 py-0.5 rounded-full font-medium">
+                Active
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 mt-2">
+              <span className="text-xs text-gray-500">Calling:</span>
+              <span className="text-xs font-medium text-gray-700">{u.selected_template_name || 'None'}</span>
+            </div>
+
+            {changingTemplate === u.id && (
+              <div className="mt-2 space-y-1">
+                <div className="text-[10px] text-gray-500 font-medium mb-1">Reassign to:</div>
+                {templates.map(t => (
+                  <button
+                    key={t.id}
+                    onClick={() => handleChangeCalling(u.id, t)}
+                    disabled={reassigning === u.id}
+                    className={`w-full text-left px-3 py-2 rounded-lg text-xs transition ${
+                      t.id === u.selected_template_id
+                        ? 'bg-blue-50 border border-blue-200 text-blue-700 font-medium'
+                        : 'bg-gray-50 hover:bg-gray-100 text-gray-700'
+                    } disabled:opacity-50`}
+                  >
+                    {t.name} {reassigning === u.id && t.id !== u.selected_template_id ? '' : ''}
+                  </button>
+                ))}
+                {reassigning === u.id && (
+                  <p className="text-[10px] text-gray-400">Reassigning...</p>
+                )}
+              </div>
+            )}
+
+            <div className="flex gap-2 mt-3">
+              <button
+                onClick={() => setChangingTemplate(changingTemplate === u.id ? null : u.id)}
+                className="flex-1 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100"
+              >
+                {changingTemplate === u.id ? 'Cancel' : 'Change Calling'}
+              </button>
+              <button
+                onClick={() => handleRemoveAccess(u.id, u.full_name || 'this user')}
+                className="px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100"
+              >
+                Remove
               </button>
             </div>
           </div>
