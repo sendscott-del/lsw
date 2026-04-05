@@ -37,8 +37,11 @@ export default function AppShell({ children, activeTab, onTabChange }: AppShellP
   return (
     <div className="min-h-screen flex flex-col pb-16">
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-        <h1 className="text-lg font-bold text-gray-900">Steward</h1>
+      <header className="sticky top-0 z-30 bg-white border-b border-gray-200 px-4 py-2.5 flex items-center justify-between">
+        <div>
+          <h1 className="text-lg font-bold text-gray-900">Steward</h1>
+          <p className="text-[10px] italic text-gray-400 leading-tight">&ldquo;I have appointed unto you to be stewards... even stewards indeed.&rdquo; <span className="not-italic">D&amp;C 104:57</span></p>
+        </div>
         <div className="relative">
           <button
             onClick={() => setShowMenu(!showMenu)}
