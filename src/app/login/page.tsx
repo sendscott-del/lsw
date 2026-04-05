@@ -20,7 +20,7 @@ export default function LoginPage() {
     setLoading(true)
 
     if (isSignUp) {
-      const { error: signUpErr } = await supabase.auth.signUp({ email, password })
+      const { data, error: signUpErr } = await supabase.auth.signUp({ email, password })
       if (signUpErr) {
         // If account already exists (from another app sharing this Supabase), try signing in
         if (signUpErr.message.toLowerCase().includes('already') || signUpErr.message.toLowerCase().includes('exists')) {
@@ -33,13 +33,18 @@ export default function LoginPage() {
         } else {
           setError(signUpErr.message)
         }
+      } else if (data.session) {
+        // Sign up returned a session — user is already logged in
+        router.push('/')
       } else {
-        // Sign up succeeded — auto sign in
+        // No session — Supabase requires confirmation. Try signing in directly.
         const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password })
         if (!signInErr) {
           router.push('/')
         } else {
-          setMessage('Account created! You can now sign in.')
+          // Last resort: tell them to sign in
+          setMessage('Account created! Switch to Sign In to continue.')
+          setIsSignUp(false)
         }
       }
     } else {
