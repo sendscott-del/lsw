@@ -311,11 +311,13 @@ function AllUsersSection() {
   }
 
   if (loading) return null
-  if (users.length === 0) return null
 
   return (
     <div>
       <h2 className="text-sm font-bold text-gray-700 mb-3">Active Users ({users.length})</h2>
+      {users.length === 0 && (
+        <p className="text-xs text-gray-400 py-4">No approved users yet.</p>
+      )}
       <div className="space-y-2">
         {users.map(u => (
           <div key={u.id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
