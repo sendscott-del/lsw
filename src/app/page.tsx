@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useCallback } from 'react'
-import { Plus, RefreshCw } from 'lucide-react'
+import { Plus, Save } from 'lucide-react'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useStewardData } from '@/lib/hooks/useStewardData'
 import { getWeekStart, formatDate } from '@/lib/dates'
@@ -17,12 +17,14 @@ import AddBehaviorModal from '@/components/AddBehaviorModal'
 import EditBehaviorModal from '@/components/EditBehaviorModal'
 import EditCategoryModal from '@/components/EditCategoryModal'
 import CallingPicker from '@/components/CallingPicker'
+import SaveAsTemplateModal from '@/components/SaveAsTemplateModal'
 import type { EntryValue } from '@/lib/types'
 
 export default function HomePage() {
   const { user, isAdmin } = useAuth()
   const [activeTab, setActiveTab] = useState<TabId>('work')
   const [showCallingPicker, setShowCallingPicker] = useState(false)
+  const [showSaveTemplate, setShowSaveTemplate] = useState(false)
 
   const { categories, behaviors, archivedBehaviors, entries, comments, complianceMap, loading, refresh, upsertEntry, upsertComment } =
     useStewardData(user?.id)
@@ -210,11 +212,11 @@ export default function HomePage() {
                     Add Category
                   </button>
                   <button
-                    onClick={() => setShowCallingPicker(true)}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-500 hover:bg-gray-100"
+                    onClick={() => setShowSaveTemplate(true)}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-600 hover:bg-blue-100"
                   >
-                    <RefreshCw size={14} />
-                    Change Calling
+                    <Save size={14} />
+                    Save as Template
                   </button>
                 </div>
               )}
@@ -247,6 +249,15 @@ export default function HomePage() {
       )}
       {editCategory && (
         <EditCategoryModal category={editCategory} onSuccess={refresh} onClose={() => setEditCategoryId(null)} />
+      )}
+      {showSaveTemplate && user && (
+        <SaveAsTemplateModal
+          userId={user.id}
+          categories={categories}
+          behaviors={behaviors}
+          onSaved={() => setShowSaveTemplate(false)}
+          onClose={() => setShowSaveTemplate(false)}
+        />
       )}
     </AppShell>
   )

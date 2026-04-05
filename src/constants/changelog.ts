@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.4.0'
+export const APP_VERSION = '2.5.0'
 
 export interface ChangelogEntry {
   version: string
@@ -8,6 +8,20 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.5.0',
+    date: '2026-04-05',
+    enhancements: [
+      'Save as Template — save your current work tab setup as a reusable template from the Work tab',
+      'Editable info notes — add or edit notes/references on any behavior via the edit modal (shows on the ℹ️ icon)',
+      'Admin: template list — view all saved templates with a preview of categories and behaviors',
+      'Admin: edit template — loads template into the work tab for editing, then save back as template',
+      'Admin: delete template — remove templates you no longer need',
+      'Removed: "Create Suggested Templates" seed button (create your own templates instead)',
+      'Removed: "Change Calling" button (replaced with "Save as Template")',
+    ],
+    bugFixes: [],
+  },
   {
     version: '2.4.0',
     date: '2026-04-02',
