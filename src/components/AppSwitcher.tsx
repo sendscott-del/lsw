@@ -51,7 +51,7 @@ export default function AppSwitcher() {
         style={{ backgroundColor: '#1e1b4b' }}
       >
         <div className="flex items-center gap-2">
-          <span className="text-[11px] font-bold text-white/50 uppercase tracking-wider">Left Field Labs</span>
+          <span className="text-[11px] font-bold text-white/50 uppercase tracking-wider">Gathered</span>
           <div className="w-px h-3 bg-white/20" />
           <img src={currentApp.logo} alt={currentApp.label} className="w-[18px] h-[18px] rounded" />
           <span className="text-sm font-bold text-white">{currentApp.label}</span>
