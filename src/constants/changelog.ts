@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.5.0'
+export const APP_VERSION = '2.6.0'
 
 export interface ChangelogEntry {
   version: string
@@ -8,6 +8,14 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.6.0',
+    date: '2026-04-12',
+    enhancements: [
+      'Left Field Labs app switcher — users with access to multiple apps (Magnify, Steward, Duty) see a toggle bar at the top to switch between them',
+    ],
+    bugFixes: [],
+  },
   {
     version: '2.5.0',
     date: '2026-04-05',

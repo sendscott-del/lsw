@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { ClipboardList, StickyNote, BookOpen, Menu, X } from 'lucide-react'
+import AppSwitcher from './AppSwitcher'
 
 export type TabId = 'work' | 'reflect' | 'notes'
 
@@ -36,6 +37,7 @@ export default function AppShell({ children, activeTab, onTabChange }: AppShellP
 
   return (
     <div className="min-h-screen flex flex-col pb-16">
+      <AppSwitcher />
       {/* Header */}
       <header className="sticky top-0 z-30 bg-white border-b border-gray-200 px-4 py-2.5 flex items-center justify-between">
         <div>
