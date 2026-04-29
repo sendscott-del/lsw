@@ -122,7 +122,7 @@ export default function AppShell({ children, activeTab, onTabChange }: AppShellP
         <button
           onClick={() => onTabChange('work')}
           className={`flex-1 flex flex-col items-center py-2 text-xs ${
-            activeTab === 'work' ? 'text-blue-600' : 'text-gray-400'
+            activeTab === 'work' ? 'text-steward-primary' : 'text-gray-400'
           }`}
         >
           <ClipboardList size={20} />
@@ -131,7 +131,7 @@ export default function AppShell({ children, activeTab, onTabChange }: AppShellP
         <button
           onClick={() => onTabChange('reflect')}
           className={`flex-1 flex flex-col items-center py-2 text-xs ${
-            activeTab === 'reflect' ? 'text-blue-600' : 'text-gray-400'
+            activeTab === 'reflect' ? 'text-steward-primary' : 'text-gray-400'
           }`}
         >
           <BookOpen size={20} />
@@ -140,7 +140,7 @@ export default function AppShell({ children, activeTab, onTabChange }: AppShellP
         <button
           onClick={() => onTabChange('notes')}
           className={`flex-1 flex flex-col items-center py-2 text-xs ${
-            activeTab === 'notes' ? 'text-blue-600' : 'text-gray-400'
+            activeTab === 'notes' ? 'text-steward-primary' : 'text-gray-400'
           }`}
         >
           <StickyNote size={20} />

@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.6.4'
+export const APP_VERSION = '2.6.5'
 
 export interface ChangelogEntry {
   version: string
@@ -8,6 +8,14 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.6.5',
+    date: '2026-04-29',
+    enhancements: [
+      'Primary action buttons (Save, Sign In, Add, Continue) and the active bottom-tab indicator now route through the Steward primary token (bg-steward-primary / text-steward-primary) instead of bare blue-600 utilities — same color, but the codebase now expresses brand intent so the design system can shift the accent in one place',
+    ],
+    bugFixes: [],
+  },
   {
     version: '2.6.4',
     date: '2026-04-29',
