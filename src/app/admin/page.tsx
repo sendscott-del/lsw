@@ -143,9 +143,9 @@ function PendingUsersSection() {
     fetchUsers()
   }
 
-  async function handleReject(userId: string) {
-    if (!confirm('Reject this user?')) return
-    await supabase.from('steward_user_profiles').update({ status: 'rejected' }).eq('id', userId)
+  async function handleReject(user: UserProfile) {
+    if (!confirm(`Reject access for ${user.email}? They won't be able to sign in.`)) return
+    await supabase.from('steward_user_profiles').update({ status: 'rejected' }).eq('id', user.id)
     fetchUsers()
   }
 
@@ -212,7 +212,7 @@ function PendingUsersSection() {
                 Approve
               </button>
               <button
-                onClick={() => handleReject(u.id)}
+                onClick={() => handleReject(u)}
                 className="px-4 py-2 text-red-600 bg-red-50 rounded-lg text-xs font-medium hover:bg-red-100"
               >
                 Reject
@@ -396,9 +396,9 @@ function TemplatesSection({ userId }: { userId: string }) {
 
   useEffect(() => { fetchTemplates() }, [fetchTemplates])
 
-  async function handleDelete(id: string) {
-    if (!confirm('Delete this template and all its contents?')) return
-    await supabase.from('steward_templates').delete().eq('id', id)
+  async function handleDelete(template: Template) {
+    if (!confirm(`Delete the template "${template.name}" and all its contents? This cannot be undone.`)) return
+    await supabase.from('steward_templates').delete().eq('id', template.id)
     fetchTemplates()
   }
 
@@ -485,8 +485,10 @@ function TemplatesSection({ userId }: { userId: string }) {
                     <Pencil size={12} /> Edit
                   </button>
                   <button
-                    onClick={() => handleDelete(t.id)}
+                    onClick={() => handleDelete(t)}
                     className="p-1.5 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50"
+                    aria-label={`Delete template ${t.name}`}
+                    title={`Delete template ${t.name}`}
                   >
                     <Trash2 size={14} />
                   </button>

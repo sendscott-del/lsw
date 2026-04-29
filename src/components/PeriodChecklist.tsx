@@ -89,7 +89,7 @@ export default function PeriodChecklist({
           <h2 className="text-sm md:text-base font-bold text-gray-800">{title}</h2>
         </div>
         <span className={`text-xs md:text-sm font-bold ${done === total && total > 0 ? 'text-green-600' : 'text-gray-400'}`}>
-          {done}/{total}
+          {done} of {total} done
         </span>
       </button>
 
