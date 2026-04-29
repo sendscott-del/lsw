@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { useLanguage } from '@/lib/i18n/LanguageContext'
 import { ClipboardList, StickyNote, BookOpen, Menu, X } from 'lucide-react'
 import AppSwitcher from './AppSwitcher'
 
@@ -17,6 +18,7 @@ interface AppShellProps {
 export default function AppShell({ children, activeTab, onTabChange }: AppShellProps) {
   const { user, loading, isAdmin, signOut } = useAuth()
   const router = useRouter()
+  const { t, lang, setLang } = useLanguage()
   const [showMenu, setShowMenu] = useState(false)
 
   useEffect(() => {
@@ -28,7 +30,7 @@ export default function AppShell({ children, activeTab, onTabChange }: AppShellP
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-gray-400 text-sm">Loading...</div>
+        <div className="text-gray-400 text-sm">{t('app.loading')}</div>
       </div>
     )
   }
@@ -41,13 +43,14 @@ export default function AppShell({ children, activeTab, onTabChange }: AppShellP
       {/* Header */}
       <header className="sticky top-0 z-30 bg-white border-b border-gray-200 px-4 py-2.5 flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-bold text-gray-900">Steward</h1>
-          <p className="text-[10px] italic text-gray-400 leading-tight">&ldquo;I have appointed unto you to be stewards... even stewards indeed.&rdquo; <span className="not-italic">D&amp;C 104:57</span></p>
+          <h1 className="text-lg font-bold text-gray-900">{t('app.name')}</h1>
+          <p className="text-[10px] italic text-gray-400 leading-tight">&ldquo;{t('app.tagline')}&rdquo; <span className="not-italic">{t('app.taglineRef')}</span></p>
         </div>
         <div className="relative">
           <button
             onClick={() => setShowMenu(!showMenu)}
             className="p-1 text-gray-500 hover:text-gray-700"
+            aria-label={showMenu ? t('common.close') : t('menu.language')}
           >
             {showMenu ? <X size={20} /> : <Menu size={20} />}
           </button>
@@ -61,7 +64,7 @@ export default function AppShell({ children, activeTab, onTabChange }: AppShellP
                       onClick={() => { router.push('/admin'); setShowMenu(false) }}
                       className="w-full px-4 py-2 text-left text-sm text-blue-600 font-medium hover:bg-blue-50"
                     >
-                      Admin
+                      {t('menu.admin')}
                     </button>
                     <div className="border-t border-gray-100 my-1" />
                   </>
@@ -70,20 +73,38 @@ export default function AppShell({ children, activeTab, onTabChange }: AppShellP
                   onClick={() => { router.push('/guide'); setShowMenu(false) }}
                   className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
                 >
-                  User Guide
+                  {t('menu.userGuide')}
                 </button>
                 <button
                   onClick={() => { router.push('/release-notes'); setShowMenu(false) }}
                   className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
                 >
-                  Release Notes
+                  {t('menu.releaseNotes')}
                 </button>
+                <div className="border-t border-gray-100 my-1" />
+                <div className="px-4 py-2">
+                  <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-1">{t('menu.language')}</p>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => setLang('en')}
+                      className={`flex-1 py-1 text-xs rounded ${lang === 'en' ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-50'}`}
+                    >
+                      {t('menu.languageEnglish')}
+                    </button>
+                    <button
+                      onClick={() => setLang('es')}
+                      className={`flex-1 py-1 text-xs rounded ${lang === 'es' ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-50'}`}
+                    >
+                      {t('menu.languageSpanish')}
+                    </button>
+                  </div>
+                </div>
                 <div className="border-t border-gray-100 my-1" />
                 <button
                   onClick={() => { signOut(); setShowMenu(false) }}
                   className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-50"
                 >
-                  Sign Out
+                  {t('menu.signOut')}
                 </button>
               </div>
             </>
@@ -105,7 +126,7 @@ export default function AppShell({ children, activeTab, onTabChange }: AppShellP
           }`}
         >
           <ClipboardList size={20} />
-          <span className="mt-0.5">Work</span>
+          <span className="mt-0.5">{t('tab.work')}</span>
         </button>
         <button
           onClick={() => onTabChange('reflect')}
@@ -114,7 +135,7 @@ export default function AppShell({ children, activeTab, onTabChange }: AppShellP
           }`}
         >
           <BookOpen size={20} />
-          <span className="mt-0.5">Reflect</span>
+          <span className="mt-0.5">{t('tab.reflect')}</span>
         </button>
         <button
           onClick={() => onTabChange('notes')}
@@ -123,7 +144,7 @@ export default function AppShell({ children, activeTab, onTabChange }: AppShellP
           }`}
         >
           <StickyNote size={20} />
-          <span className="mt-0.5">Notes</span>
+          <span className="mt-0.5">{t('tab.notes')}</span>
         </button>
       </nav>
     </div>

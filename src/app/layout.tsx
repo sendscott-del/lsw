@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next'
+import { LanguageProvider } from '@/lib/i18n/LanguageContext'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -28,7 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className="min-h-screen bg-white">
-        {children}
+        <LanguageProvider>{children}</LanguageProvider>
       </body>
     </html>
   )
