@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.6.3'
+export const APP_VERSION = '2.6.4'
 
 export interface ChangelogEntry {
   version: string
@@ -8,6 +8,16 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.6.4',
+    date: '2026-04-29',
+    enhancements: [
+      'Section completion counters now read "12 of 18 done" instead of "12/18" so the unit is always visible',
+      'Admin: rejecting a user spells out the email address in the confirm prompt; deleting a template spells out the template name and warns it cannot be undone',
+      'Admin: template trash icon now has a screen-reader label ("Delete template <name>") instead of being icon-only',
+    ],
+    bugFixes: [],
+  },
   {
     version: '2.6.3',
     date: '2026-04-29',
