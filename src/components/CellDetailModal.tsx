@@ -84,7 +84,7 @@ export default function CellDetailModal({
 
         <button
           onClick={() => onSave(value, comment)}
-          className="w-full py-2.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+          className="w-full py-2.5 bg-steward-primary text-white rounded-lg text-sm font-medium hover:bg-steward-primary-dark"
         >
           Save
         </button>

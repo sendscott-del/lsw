@@ -74,7 +74,7 @@ export default function EditCategoryModal({ category, onSuccess, onClose }: Edit
           <button
             type="submit"
             disabled={loading || !name.trim()}
-            className="w-full py-2.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+            className="w-full py-2.5 bg-steward-primary text-white rounded-lg text-sm font-medium hover:bg-steward-primary-dark disabled:opacity-50"
           >
             {loading ? 'Saving...' : 'Save'}
           </button>
