@@ -1,19 +1,12 @@
 @import "tailwindcss";
-
-:root {
-  --color-y: #22c55e;
-  --color-n: #ef4444;
-  --color-k: #f59e0b;
-  --color-empty: #f3f4f6;
-  --color-today: #dbeafe;
-}
+@import "./tokens.css";
 
 body {
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #ffffff;
-  color: #111827;
+  background: var(--bg-1);
+  color: var(--fg-1);
 }
 
 /* Prevent text selection on grid cells for mobile */

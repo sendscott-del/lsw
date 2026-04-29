@@ -17,6 +17,14 @@ export const CHANGELOG: ChangelogEntry[] = [
     bugFixes: [],
   },
   {
+    version: '2.6.1',
+    date: '2026-04-29',
+    enhancements: [
+      'Adopted the shared Stake Suite design tokens — Tailwind v4 now generates utilities for brand-primary, steward-primary, stage-*, type-*, plus the canonical radii / shadow / type-scale / spacing scale shared across Magnify, Steward, and Tidings',
+    ],
+    bugFixes: [],
+  },
+  {
     version: '2.6.0',
     date: '2026-04-12',
     enhancements: [
