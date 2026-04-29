@@ -7,7 +7,7 @@ import { useLanguage } from '@/lib/i18n/LanguageContext'
 
 export default function LoginPage() {
   const router = useRouter()
-  const { t } = useLanguage()
+  const { t, lang, setLang } = useLanguage()
   const [isSignUp, setIsSignUp] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -24,7 +24,6 @@ export default function LoginPage() {
     if (isSignUp) {
       const { data, error: signUpErr } = await supabase.auth.signUp({ email, password })
       if (signUpErr) {
-        // If account already exists (from another app sharing this Supabase), try signing in
         if (signUpErr.message.toLowerCase().includes('already') || signUpErr.message.toLowerCase().includes('exists')) {
           const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password })
           if (signInErr) {
@@ -36,15 +35,12 @@ export default function LoginPage() {
           setError(signUpErr.message)
         }
       } else if (data.session) {
-        // Sign up returned a session — user is already logged in
         router.push('/')
       } else {
-        // No session — Supabase requires confirmation. Try signing in directly.
         const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password })
         if (!signInErr) {
           router.push('/')
         } else {
-          // Last resort: tell them to sign in
           setMessage(t('auth.accountCreatedSwitch'))
           setIsSignUp(false)
         }
@@ -61,72 +57,100 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-gray-50">
-      <div className="w-full max-w-sm">
-        <div className="flex justify-center mb-4">
-          <img src="/logo.png" alt="Steward" className="h-24 md:h-32 w-auto" />
+    <div className="min-h-screen bg-gray-50">
+      {/* Navy hero band */}
+      <div className="bg-brand-primary-dark px-6 pt-14 pb-24 text-white">
+        <div className="max-w-sm mx-auto">
+          <div className="flex items-center gap-3 mb-6">
+            <img src="/logo.png" alt="Steward" className="w-11 h-11 rounded-md bg-white/10 p-1" />
+            <div>
+              <p className="text-lg font-bold tracking-tight">Steward</p>
+              <p className="text-xs text-white/80">Stewardship Tracker</p>
+            </div>
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight">
+            {isSignUp ? t('auth.signUpTitle') : t('auth.signInTitle')}
+          </h1>
         </div>
-        <p className="text-gray-500 text-center text-sm mb-8">
-          {isSignUp ? t('auth.signUpTitle') : t('auth.signInTitle')}
-        </p>
+      </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              {t('auth.email')}
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder={t('auth.emailPlaceholder')}
-            />
+      {/* Form card overlapping the hero */}
+      <div className="px-4 -mt-12 pb-10">
+        <div className="max-w-sm mx-auto bg-white rounded-2xl shadow-lg p-6">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                {t('auth.email')}
+              </label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-steward-primary focus:border-transparent"
+                placeholder={t('auth.emailPlaceholder')}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                {t('auth.password')}
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required
+                minLength={6}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-steward-primary focus:border-transparent"
+                placeholder={t('auth.passwordPlaceholder')}
+              />
+            </div>
+
+            {error && <p className="text-red-600 text-sm">{error}</p>}
+            {message && <p className="text-green-600 text-sm">{message}</p>}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-2.5 bg-steward-primary text-white rounded-lg text-sm font-medium hover:bg-steward-primary-dark disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? t('auth.loading') : isSignUp ? t('auth.signUp') : t('auth.signIn')}
+            </button>
+          </form>
+
+          <p className="text-center text-sm text-gray-500 mt-6">
+            {isSignUp ? t('auth.haveAccount') : t('auth.noAccount')}{' '}
+            <button
+              onClick={() => { setIsSignUp(!isSignUp); setError(''); setMessage('') }}
+              className="text-steward-primary font-medium hover:underline"
+            >
+              {isSignUp ? t('auth.signIn') : t('auth.signUp')}
+            </button>
+          </p>
+
+          {/* Language toggle */}
+          <div className="flex justify-center gap-1 mt-6 pt-4 border-t border-gray-100">
+            <button
+              onClick={() => setLang('en')}
+              className={`px-4 py-1 text-xs rounded-full font-semibold transition-colors ${
+                lang === 'en' ? 'bg-brand-primary-fade text-brand-primary' : 'text-gray-400 hover:text-gray-600'
+              }`}
+            >
+              English
+            </button>
+            <button
+              onClick={() => setLang('es')}
+              className={`px-4 py-1 text-xs rounded-full font-semibold transition-colors ${
+                lang === 'es' ? 'bg-brand-primary-fade text-brand-primary' : 'text-gray-400 hover:text-gray-600'
+              }`}
+            >
+              Español
+            </button>
           </div>
-
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-              {t('auth.password')}
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-              minLength={6}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder={t('auth.passwordPlaceholder')}
-            />
-          </div>
-
-          {error && (
-            <p className="text-red-600 text-sm">{error}</p>
-          )}
-          {message && (
-            <p className="text-green-600 text-sm">{message}</p>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-2.5 bg-steward-primary text-white rounded-lg text-sm font-medium hover:bg-steward-primary-dark disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? t('auth.loading') : isSignUp ? t('auth.signUp') : t('auth.signIn')}
-          </button>
-        </form>
-
-        <p className="text-center text-sm text-gray-500 mt-6">
-          {isSignUp ? t('auth.haveAccount') : t('auth.noAccount')}{' '}
-          <button
-            onClick={() => { setIsSignUp(!isSignUp); setError(''); setMessage('') }}
-            className="text-blue-600 font-medium hover:underline"
-          >
-            {isSignUp ? t('auth.signIn') : t('auth.signUp')}
-          </button>
-        </p>
+        </div>
       </div>
     </div>
   )

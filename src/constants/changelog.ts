@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.6.5'
+export const APP_VERSION = '2.7.0'
 
 export interface ChangelogEntry {
   version: string
@@ -8,6 +8,15 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.7.0',
+    date: '2026-04-29',
+    enhancements: [
+      'Login page redesigned to match the Stake Suite auth pattern: deep navy hero band at the top with the Steward logo + name + screen heading in white, with the white form card overlapping the bottom of the hero. Replaces the previous plain-white treatment',
+      'Login page now has an English / Español language toggle directly below the form so users can switch language before signing in',
+    ],
+    bugFixes: [],
+  },
   {
     version: '2.6.5',
     date: '2026-04-29',
