@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.6.1'
+export const APP_VERSION = '2.6.3'
 
 export interface ChangelogEntry {
   version: string
@@ -8,6 +8,14 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.6.3',
+    date: '2026-04-29',
+    enhancements: [
+      'Spanish language support — toggle EN / Español from the header menu. The chrome (header tagline, bottom tabs, sign-out menu) and the entire login screen are translated; preference persists in localStorage and auto-detects from the browser on first load',
+    ],
+    bugFixes: [],
+  },
   {
     version: '2.6.1',
     date: '2026-04-29',
