@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.7.0'
+export const APP_VERSION = '2.8.0'
 
 export interface ChangelogEntry {
   version: string
@@ -8,6 +8,15 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.8.0',
+    date: '2026-04-29',
+    enhancements: [
+      'New Steward logo — flowing white "S" letterform with a gold checkmark in the upper-right counter (the "done" detail), rendered as a crisp SVG. Replaces the old photographic logo on the Login screen and adds the mark to the AppShell header next to the title',
+      'Home-screen icon, favicon, apple-touch-icon, and PWA install icons (192px / 512px) all updated to the new mark — clean S+check on the deep navy brand background',
+    ],
+    bugFixes: [],
+  },
   {
     version: '2.7.0',
     date: '2026-04-29',

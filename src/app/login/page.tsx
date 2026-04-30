@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { useLanguage } from '@/lib/i18n/LanguageContext'
+import { StewardLogo } from '@/components/icons/StewardLogo'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -62,10 +63,10 @@ export default function LoginPage() {
       <div className="bg-brand-primary-dark px-6 pt-14 pb-24 text-white">
         <div className="max-w-sm mx-auto">
           <div className="flex items-center gap-3 mb-6">
-            <img src="/logo.png" alt="Steward" className="w-11 h-11 rounded-md bg-white/10 p-1" />
+            <StewardLogo size={44} />
             <div>
               <p className="text-lg font-bold tracking-tight">Steward</p>
-              <p className="text-xs text-white/80">Stewardship Tracker</p>
+              <p className="text-xs text-white/80">Leader Standard Work</p>
             </div>
           </div>
           <h1 className="text-3xl font-bold tracking-tight">
