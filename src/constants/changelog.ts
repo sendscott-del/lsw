@@ -9,6 +9,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '2.8.1',
+    date: '2026-04-29',
+    enhancements: [
+      'Magnify icon in the Gathered AppSwitcher (the cross-app jump bar at the top) now uses the new Magnify mark — clean white M with a gold magnifying lens — instead of the old photographic logo',
+    ],
+    bugFixes: [],
+  },
+  {
     version: '2.8.0',
     date: '2026-04-29',
     enhancements: [
