@@ -6,6 +6,7 @@ import { useAuth } from '@/lib/hooks/useAuth'
 import { useLanguage } from '@/lib/i18n/LanguageContext'
 import { ClipboardList, StickyNote, BookOpen, Menu, X } from 'lucide-react'
 import AppSwitcher from './AppSwitcher'
+import { StewardLogo } from './icons/StewardLogo'
 
 export type TabId = 'work' | 'reflect' | 'notes'
 
@@ -41,10 +42,13 @@ export default function AppShell({ children, activeTab, onTabChange }: AppShellP
     <div className="min-h-screen flex flex-col pb-16">
       <AppSwitcher />
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-white border-b border-gray-200 px-4 py-2.5 flex items-center justify-between">
-        <div>
-          <h1 className="text-lg font-bold text-gray-900">{t('app.name')}</h1>
-          <p className="text-[10px] italic text-gray-400 leading-tight">&ldquo;{t('app.tagline')}&rdquo; <span className="not-italic">{t('app.taglineRef')}</span></p>
+      <header className="sticky top-0 z-30 bg-white border-b border-gray-200 px-4 py-2.5 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <StewardLogo size={32} />
+          <div className="min-w-0">
+            <h1 className="text-lg font-bold text-gray-900 leading-tight">{t('app.name')}</h1>
+            <p className="text-[10px] italic text-gray-400 leading-tight truncate">&ldquo;{t('app.tagline')}&rdquo; <span className="not-italic">{t('app.taglineRef')}</span></p>
+          </div>
         </div>
         <div className="relative">
           <button
