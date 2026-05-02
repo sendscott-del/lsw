@@ -106,14 +106,10 @@
   --font-weight-bold:      800;  /* badges, count chips */
 
   /* ---- Spacing ---- */
-  /* Tailwind ships 0/0.5/1/… by default. We add named tokens
-     to match the suite scale (4/8/16/24/32/48). */
-  --spacing-xs:  4px;
-  --spacing-sm:  8px;
-  --spacing-md:  16px;
-  --spacing-lg:  24px;
-  --spacing-xl:  32px;
-  --spacing-2xl: 48px;
+  /* Use Tailwind's default spacing scale (p-1, p-2, …, p-12) which is
+     driven by --spacing: 0.25rem. Named keys like --spacing-sm/md collide
+     with the sizing scale (max-w-sm, w-md, …) and break layout, so we
+     don't define them here. */
 
   /* ---- Radii ---- */
   --radius-sm:   6px;
