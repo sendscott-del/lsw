@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.8.0'
+export const APP_VERSION = '2.8.2'
 
 export interface ChangelogEntry {
   version: string
@@ -8,6 +8,14 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.8.2',
+    date: '2026-05-01',
+    enhancements: [],
+    bugFixes: [
+      'Login page layout was collapsed into a tiny vertical column where every word wrapped on its own line. Caused by named spacing tokens (--spacing-sm/md/lg/…) added in the design-token rollout colliding with Tailwind v4\'s sizing scale, so max-w-sm resolved to 8px instead of 24rem. Removed the unused named spacing tokens; the form card now lays out at its intended width and the navy hero band reads correctly',
+    ],
+  },
   {
     version: '2.8.1',
     date: '2026-04-29',
