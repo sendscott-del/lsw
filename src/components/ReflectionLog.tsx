@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { Category, Behavior, CellComment } from '@/lib/types'
+import { useDemoMode } from '@/lib/demoMode'
+import { buildDemoFixture } from '@/lib/demoFixtures'
 
 interface ReflectionLogProps {
   userId: string
@@ -15,6 +17,7 @@ interface CommentWithContext extends CellComment {
 }
 
 export default function ReflectionLog({ userId }: ReflectionLogProps) {
+  const { demoMode, demoRole } = useDemoMode()
   const [comments, setComments] = useState<CommentWithContext[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -22,15 +25,41 @@ export default function ReflectionLog({ userId }: ReflectionLogProps) {
     async function fetchReflections() {
       setLoading(true)
 
-      const [catRes, behRes, comRes] = await Promise.all([
-        supabase.from('steward_categories').select('*').eq('user_id', userId).order('sort_order'),
-        supabase.from('steward_behaviors').select('*').eq('user_id', userId).order('sort_order'),
-        supabase.from('steward_cell_comments').select('*').eq('user_id', userId).order('entry_date', { ascending: false }),
-      ])
+      let categories: Category[]
+      let behaviors: Behavior[]
+      let rawComments: CellComment[]
 
-      const categories = (catRes.data ?? []) as Category[]
-      const behaviors = (behRes.data ?? []) as Behavior[]
-      const rawComments = (comRes.data ?? []) as CellComment[]
+      if (demoMode) {
+        // Demo: pull the same role-keyed fixture the Work tab uses, with
+        // a couple of extra reflection notes so the log isn't empty.
+        const fx = buildDemoFixture(demoRole)
+        categories = fx.categories
+        behaviors = fx.behaviors
+        const extra: CellComment[] = behaviors.slice(0, 3).map((b, i) => ({
+          id: `demo-com-${b.id}-${i + 1}`,
+          user_id: 'demo',
+          behavior_id: b.id,
+          entry_date: new Date(Date.now() - i * 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
+          comment:
+            i === 0
+              ? 'Demo reflection: held the meeting on Sunday — felt like the spirit was with us.'
+              : i === 1
+                ? 'Demo reflection: missed this last week, want to be more consistent.'
+                : 'Demo reflection: family conflict but I made it work.',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        } as unknown as CellComment))
+        rawComments = [...fx.comments, ...extra]
+      } else {
+        const [catRes, behRes, comRes] = await Promise.all([
+          supabase.from('steward_categories').select('*').eq('user_id', userId).order('sort_order'),
+          supabase.from('steward_behaviors').select('*').eq('user_id', userId).order('sort_order'),
+          supabase.from('steward_cell_comments').select('*').eq('user_id', userId).order('entry_date', { ascending: false }),
+        ])
+        categories = (catRes.data ?? []) as Category[]
+        behaviors = (behRes.data ?? []) as Behavior[]
+        rawComments = (comRes.data ?? []) as CellComment[]
+      }
 
       const catMap = new Map(categories.map(c => [c.id, c]))
       const behMap = new Map(behaviors.map(b => [b.id, b]))
@@ -53,7 +82,7 @@ export default function ReflectionLog({ userId }: ReflectionLogProps) {
     }
 
     fetchReflections()
-  }, [userId])
+  }, [userId, demoMode, demoRole])
 
   if (loading) {
     return (
