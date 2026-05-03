@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.10.0'
+export const APP_VERSION = '2.11.0'
 
 export interface ChangelogEntry {
   version: string
@@ -8,6 +8,14 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.11.0',
+    date: '2026-05-03',
+    enhancements: [
+      'Demo mode now actually shows demo data: turning the banner on swaps every steward_categories / steward_behaviors / steward_entries / steward_cell_comments read for a per-role fixture, so the demoer sees a realistic week of leader checklist data without ever touching real ward records. Fixtures cover Stake President, Stake Clerk, High Councilor, Bishop, EQ President, RS President, and member — pick the role from the banner. Toggling cells (Y / N / K / blank) and writing notes still works in demo, but only against in-memory state — nothing is persisted, and a refresh resets to the seeded fixture. This means Real and Demo modes coexist on the same device without the demo polluting the real database.',
+    ],
+    bugFixes: [],
+  },
   {
     version: '2.10.0',
     date: '2026-05-03',
