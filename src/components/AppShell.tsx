@@ -7,6 +7,7 @@ import { useLanguage } from '@/lib/i18n/LanguageContext'
 import { ClipboardList, StickyNote, BookOpen, Menu, X } from 'lucide-react'
 import AppSwitcher from './AppSwitcher'
 import { StewardLogo } from './icons/StewardLogo'
+import { DemoModeToggle } from './DemoModeBanner'
 
 export type TabId = 'work' | 'reflect' | 'notes'
 
@@ -70,9 +71,19 @@ export default function AppShell({ children, activeTab, onTabChange }: AppShellP
                     >
                       {t('menu.admin')}
                     </button>
+                    <button
+                      onClick={() => { router.push('/admin/gather'); setShowMenu(false) }}
+                      className="w-full px-4 py-2 text-left text-sm text-blue-600 font-medium hover:bg-blue-50"
+                    >
+                      Gather — User access
+                    </button>
                     <div className="border-t border-gray-100 my-1" />
                   </>
                 )}
+                <div onClick={() => setShowMenu(false)}>
+                  <DemoModeToggle />
+                </div>
+                <div className="border-t border-gray-100 my-1" />
                 <button
                   onClick={() => { router.push('/guide'); setShowMenu(false) }}
                   className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"

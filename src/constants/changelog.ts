@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.8.2'
+export const APP_VERSION = '2.11.0'
 
 export interface ChangelogEntry {
   version: string
@@ -8,6 +8,34 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.11.0',
+    date: '2026-05-03',
+    enhancements: [
+      'Demo mode now actually shows demo data: turning the banner on swaps every steward_categories / steward_behaviors / steward_entries / steward_cell_comments read for a per-role fixture, so the demoer sees a realistic week of leader checklist data without ever touching real ward records. Fixtures cover Stake President, Stake Clerk, High Councilor, Bishop, EQ President, RS President, and member — pick the role from the banner. Toggling cells (Y / N / K / blank) and writing notes still works in demo, but only against in-memory state — nothing is persisted, and a refresh resets to the seeded fixture. This means Real and Demo modes coexist on the same device without the demo polluting the real database.',
+    ],
+    bugFixes: [],
+  },
+  {
+    version: '2.10.0',
+    date: '2026-05-03',
+    enhancements: [
+      'Cross-app user admin: a new /admin/gather screen lets the Stake President or Stake Clerk see every user in one table and toggle which of the five Gather apps each one can use. Toggling a chip flips a row in the shared user_apps table — that same table powers the Gathered switcher in every app, so granting access here lights up the right apps everywhere. The Stake President can also promote / demote a Stake Clerk into the super-admin role from this screen.',
+      'Demo mode: a striped amber banner now sits at the top of every Steward screen when demo mode is on. The banner lets the demoer pick a role (Stake President, Stake Clerk, Bishop, EQ President, RS President, member) so they can talk through what each role experiences without exposing real ward data. Toggle from the hamburger menu under "Demo mode". Demo flag is stored in localStorage, so it persists per-device and lives alongside real-mode use.',
+      'Hamburger menu: added a new "Gather — User access" entry (admins only) and the Demo-mode toggle. Layout otherwise unchanged.',
+    ],
+    bugFixes: [],
+  },
+  {
+    version: '2.9.0',
+    date: '2026-05-03',
+    enhancements: [
+      'Gather suite unification: the "Gathered" cross-app jump bar now lists all five sibling apps — Magnify, Steward, Glean, Tidings, and Knit — with brand-colored letter avatars and one-line descriptions. The dropdown still only shows apps you actually have access to (read from the shared user_apps table).',
+      'Forgot password: a dedicated /forgot-password page now sends a Supabase password-reset email; the email links into a /reset-password page where you choose a new password. Login page links to it inline. Both pages are bilingual EN/ES.',
+      'Sign up was already on the login page — kept the existing toggle, just added the forgot-password link beside it.',
+    ],
+    bugFixes: [],
+  },
   {
     version: '2.8.2',
     date: '2026-05-01',

@@ -5,6 +5,8 @@ import { supabase } from '@/lib/supabase'
 import { formatDate, getLast12Dates, getWeekStart } from '@/lib/dates'
 import { addWeeks, addMonths } from 'date-fns'
 import type { Category, Behavior, Entry, CellComment, EntryValue } from '@/lib/types'
+import { useDemoMode } from '@/lib/demoMode'
+import { buildDemoFixture, demoEntryKey } from '@/lib/demoFixtures'
 
 interface StewardData {
   categories: Category[]
@@ -24,6 +26,7 @@ function entryKey(behaviorId: string, date: string): string {
 }
 
 export function useStewardData(userId: string | undefined): StewardData {
+  const { demoMode, demoRole } = useDemoMode()
   const [categories, setCategories] = useState<Category[]>([])
   const [behaviors, setBehaviors] = useState<Behavior[]>([])
   const [archivedBehaviors, setArchivedBehaviors] = useState<Behavior[]>([])
@@ -31,7 +34,26 @@ export function useStewardData(userId: string | undefined): StewardData {
   const [comments, setComments] = useState<Map<string, CellComment>>(new Map())
   const [loading, setLoading] = useState(true)
 
+  // Demo mode: replace all Supabase reads with role-specific fixtures.
+  // Mutations stay in local state — they don't hit the database, so demo
+  // sessions don't pollute real ward data and don't survive a page reload.
+  useEffect(() => {
+    if (!demoMode) return
+    const fixture = buildDemoFixture(demoRole)
+    setCategories(fixture.categories)
+    setBehaviors(fixture.behaviors)
+    setArchivedBehaviors([])
+    const em = new Map<string, Entry>()
+    for (const e of fixture.entries) em.set(entryKey(e.behavior_id, e.entry_date), e)
+    setEntries(em)
+    const cm = new Map<string, CellComment>()
+    for (const c of fixture.comments) cm.set(demoEntryKey(c.behavior_id, c.entry_date), c)
+    setComments(cm)
+    setLoading(false)
+  }, [demoMode, demoRole])
+
   const fetchData = useCallback(async () => {
+    if (demoMode) return // fixtures already loaded above
     if (!userId) return
     setLoading(true)
 
@@ -106,34 +128,53 @@ export function useStewardData(userId: string | undefined): StewardData {
   }, [behaviors, entries])
 
   const upsertEntry = useCallback(async (behaviorId: string, date: string, value: EntryValue | null) => {
-    if (!userId) return
     const key = entryKey(behaviorId, date)
+    if (demoMode) {
+      // Demo: update local state only — never persist.
+      setEntries(prev => {
+        const next = new Map(prev)
+        if (value === null) next.delete(key)
+        else next.set(key, { id: key, behavior_id: behaviorId, entry_date: date, value } as unknown as Entry)
+        return next
+      })
+      return
+    }
+    if (!userId) return
     if (value === null) {
       setEntries(prev => { const next = new Map(prev); next.delete(key); return next })
       await supabase.from('steward_entries').delete().eq('behavior_id', behaviorId).eq('entry_date', date).eq('user_id', userId)
     } else {
-      setEntries(prev => new Map(prev).set(key, { id: key, behavior_id: behaviorId, entry_date: date, value }))
+      setEntries(prev => new Map(prev).set(key, { id: key, behavior_id: behaviorId, entry_date: date, value } as unknown as Entry))
       await supabase.from('steward_entries').upsert(
         { user_id: userId, behavior_id: behaviorId, entry_date: date, value, updated_at: new Date().toISOString() },
         { onConflict: 'behavior_id,entry_date' }
       )
     }
-  }, [userId])
+  }, [userId, demoMode])
 
   const upsertComment = useCallback(async (behaviorId: string, date: string, comment: string) => {
-    if (!userId) return
     const key = entryKey(behaviorId, date)
+    if (demoMode) {
+      setComments(prev => {
+        const next = new Map(prev)
+        if (comment.trim() === '') next.delete(key)
+        else next.set(key, { id: key, behavior_id: behaviorId, entry_date: date, comment } as unknown as CellComment)
+        return next
+      })
+      return
+    }
+    if (!userId) return
     if (comment.trim() === '') {
       setComments(prev => { const next = new Map(prev); next.delete(key); return next })
       await supabase.from('steward_cell_comments').delete().eq('behavior_id', behaviorId).eq('entry_date', date).eq('user_id', userId)
     } else {
-      setComments(prev => new Map(prev).set(key, { id: key, behavior_id: behaviorId, entry_date: date, comment }))
+      setComments(prev => new Map(prev).set(key, { id: key, behavior_id: behaviorId, entry_date: date, comment } as unknown as CellComment))
       await supabase.from('steward_cell_comments').upsert(
         { user_id: userId, behavior_id: behaviorId, entry_date: date, comment, updated_at: new Date().toISOString() },
         { onConflict: 'behavior_id,entry_date' }
       )
     }
-  }, [userId])
+  }, [userId, demoMode])
 
   return { categories, behaviors, archivedBehaviors, entries, comments, complianceMap, loading, refresh: fetchData, upsertEntry, upsertComment }
 }
