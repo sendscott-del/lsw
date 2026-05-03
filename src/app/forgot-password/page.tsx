@@ -7,7 +7,7 @@ import { useLanguage } from '@/lib/i18n/LanguageContext'
 import { StewardLogo } from '@/components/icons/StewardLogo'
 
 export default function ForgotPasswordPage() {
-  const { lang, setLang } = useLanguage()
+  const { t, lang, setLang } = useLanguage()
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [sent, setSent] = useState(false)
@@ -27,8 +27,6 @@ export default function ForgotPasswordPage() {
     setLoading(false)
   }
 
-  const t = (en: string, es: string) => (lang === 'es' ? es : en)
-
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="bg-brand-primary-dark px-6 pt-14 pb-24 text-white">
@@ -40,9 +38,7 @@ export default function ForgotPasswordPage() {
               <p className="text-xs text-white/80">Leader Standard Work</p>
             </div>
           </div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            {t('Reset your password', 'Restablecer contraseña')}
-          </h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t('auth.resetTitle')}</h1>
         </div>
       </div>
 
@@ -50,30 +46,20 @@ export default function ForgotPasswordPage() {
         <div className="max-w-sm mx-auto bg-white rounded-2xl shadow-lg p-6">
           {sent ? (
             <div className="space-y-4">
-              <p className="text-sm text-gray-700">
-                {t(
-                  "Check your inbox. We sent a password reset link to that email — open it to choose a new password.",
-                  "Revisa tu bandeja de entrada. Te enviamos un enlace para restablecer la contraseña."
-                )}
-              </p>
+              <p className="text-sm text-gray-700">{t('auth.resetSent')}</p>
               <Link
                 href="/login"
-                className="block w-full text-center py-2.5 bg-steward-primary text-white rounded-lg text-sm font-medium hover:bg-steward-primary-dark"
+                className="block w-full text-center py-2.5 bg-steward-primary text-white rounded-lg text-sm font-medium hover:bg-steward-primary-dark min-h-[44px] flex items-center justify-center"
               >
-                {t('Back to sign in', 'Volver a iniciar sesión')}
+                {t('auth.backToSignIn')}
               </Link>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
-              <p className="text-sm text-gray-600">
-                {t(
-                  "Enter your email and we'll send you a link to reset your password.",
-                  "Escribe tu correo y te enviaremos un enlace para restablecer la contraseña."
-                )}
-              </p>
+              <p className="text-sm text-gray-600">{t('auth.resetIntro')}</p>
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('Email', 'Correo electrónico')}
+                  {t('auth.email')}
                 </label>
                 <input
                   id="email"
@@ -81,23 +67,21 @@ export default function ForgotPasswordPage() {
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-steward-primary focus:border-transparent"
-                  placeholder="you@example.com"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-steward-primary focus:border-transparent min-h-[44px]"
+                  placeholder={t('auth.emailPlaceholder')}
                 />
               </div>
               {error && <p className="text-red-600 text-sm">{error}</p>}
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2.5 bg-steward-primary text-white rounded-lg text-sm font-medium hover:bg-steward-primary-dark disabled:opacity-50"
+                className="w-full py-2.5 bg-steward-primary text-white rounded-lg text-sm font-medium hover:bg-steward-primary-dark disabled:opacity-50 min-h-[44px]"
               >
-                {loading
-                  ? t('Sending…', 'Enviando…')
-                  : t('Send reset link', 'Enviar enlace')}
+                {loading ? t('auth.sending') : t('auth.sendResetLink')}
               </button>
               <p className="text-center text-sm text-gray-500">
                 <Link href="/login" className="text-steward-primary font-medium hover:underline">
-                  {t('Back to sign in', 'Volver a iniciar sesión')}
+                  {t('auth.backToSignIn')}
                 </Link>
               </p>
             </form>
