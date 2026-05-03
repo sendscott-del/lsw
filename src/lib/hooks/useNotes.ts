@@ -3,14 +3,37 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { Note } from '@/lib/types'
+import { useDemoMode } from '@/lib/demoMode'
+
+const DEMO_SEED_NOTE =
+  'Welcome to Steward — Notes is your scratchpad for the week.\n\n' +
+  '• Stake presidency agenda\n' +
+  '• Bishopric training prep\n' +
+  '• People to minister to: …\n\n' +
+  'In demo mode this note lives only in memory — refresh to reset, your real notes are untouched.'
 
 export function useNotes(userId: string | undefined) {
+  const { demoMode } = useDemoMode()
   const [note, setNote] = useState<Note | null>(null)
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(true)
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
+    if (demoMode) {
+      // Demo: in-memory note seeded with a friendly placeholder. Mutations
+      // update local state only — never touch steward_notes.
+      setNote({
+        id: 'demo-note',
+        user_id: 'demo',
+        content: DEMO_SEED_NOTE,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      } as unknown as Note)
+      setLoading(false)
+      return
+    }
+
     if (!userId) return
 
     async function fetchNote() {
@@ -36,12 +59,14 @@ export function useNotes(userId: string | undefined) {
     }
 
     fetchNote()
-  }, [userId])
+  }, [userId, demoMode])
 
   const updateContent = useCallback((content: string) => {
     if (!note) return
 
     setNote(prev => prev ? { ...prev, content } : null)
+
+    if (demoMode) return // demo: in-memory only
 
     if (timeoutRef.current) clearTimeout(timeoutRef.current)
 
@@ -53,7 +78,7 @@ export function useNotes(userId: string | undefined) {
         .eq('id', note.id)
       setSaving(false)
     }, 2000)
-  }, [note])
+  }, [note, demoMode])
 
   return { note, loading, saving, updateContent }
 }

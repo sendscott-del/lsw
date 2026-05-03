@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.11.0'
+export const APP_VERSION = '2.12.0'
 
 export interface ChangelogEntry {
   version: string
@@ -8,6 +8,14 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.12.0',
+    date: '2026-05-03',
+    enhancements: [
+      'Demo mode now covers Reflect and Notes too: the Reflect log shows per-role reflection notes from the same fixture the Work tab uses, plus a couple of pre-seeded sample entries so the log has content to scan. The Notes tab seeds a friendly placeholder note and writes demo edits to in-memory state only — your real steward_notes row is never touched.',
+    ],
+    bugFixes: [],
+  },
   {
     version: '2.11.0',
     date: '2026-05-03',
