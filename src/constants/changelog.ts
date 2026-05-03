@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.8.2'
+export const APP_VERSION = '2.9.0'
 
 export interface ChangelogEntry {
   version: string
@@ -8,6 +8,16 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.9.0',
+    date: '2026-05-03',
+    enhancements: [
+      'Gather suite unification: the "Gathered" cross-app jump bar now lists all five sibling apps — Magnify, Steward, Glean, Tidings, and Knit — with brand-colored letter avatars and one-line descriptions. The dropdown still only shows apps you actually have access to (read from the shared user_apps table).',
+      'Forgot password: a dedicated /forgot-password page now sends a Supabase password-reset email; the email links into a /reset-password page where you choose a new password. Login page links to it inline. Both pages are bilingual EN/ES.',
+      'Sign up was already on the login page — kept the existing toggle, just added the forgot-password link beside it.',
+    ],
+    bugFixes: [],
+  },
   {
     version: '2.8.2',
     date: '2026-05-01',

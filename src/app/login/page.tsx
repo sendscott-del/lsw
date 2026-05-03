@@ -120,6 +120,14 @@ export default function LoginPage() {
             >
               {loading ? t('auth.loading') : isSignUp ? t('auth.signUp') : t('auth.signIn')}
             </button>
+
+            {!isSignUp && (
+              <p className="text-center text-sm">
+                <a href="/forgot-password" className="text-steward-primary font-medium hover:underline">
+                  {lang === 'es' ? '¿Olvidaste tu contraseña?' : 'Forgot your password?'}
+                </a>
+              </p>
+            )}
           </form>
 
           <p className="text-center text-sm text-gray-500 mt-6">
