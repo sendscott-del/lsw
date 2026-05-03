@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.12.0'
+export const APP_VERSION = '2.13.0'
 
 export interface ChangelogEntry {
   version: string
@@ -8,6 +8,14 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.13.0',
+    date: '2026-05-03',
+    enhancements: [
+      'Cross-app grant via RPC: /admin/gather chip toggles now call gather_grant_app_access / gather_revoke_app_access SECURITY DEFINER RPCs instead of writing to user_apps directly. The RPC creates the per-app profile row (steward_user_profiles, profiles, glean_leaders, knit_admin_users) with sane defaults so a newly-granted user lands in a usable state inside the target app instead of hitting a "pending approval" / "no profile yet" gate. Tidings is on a separate Supabase project so the RPC sets the user_apps row but leaves the Tidings users table untouched (must still be added inside Tidings).',
+    ],
+    bugFixes: [],
+  },
   {
     version: '2.12.0',
     date: '2026-05-03',
