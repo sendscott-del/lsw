@@ -124,7 +124,7 @@ export default function LoginPage() {
             {!isSignUp && (
               <p className="text-center text-sm">
                 <a href="/forgot-password" className="text-steward-primary font-medium hover:underline">
-                  {lang === 'es' ? '¿Olvidaste tu contraseña?' : 'Forgot your password?'}
+                  {t('auth.forgotPassword')}
                 </a>
               </p>
             )}

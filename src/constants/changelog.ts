@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.13.0'
+export const APP_VERSION = '2.14.0'
 
 export interface ChangelogEntry {
   version: string
@@ -8,6 +8,15 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.14.0',
+    date: '2026-05-03',
+    enhancements: [
+      'i18n: forgot-password and reset-password pages are now wired through the existing translations.ts t() lookup with full English and Spanish coverage. Spanish-locale users get fully translated pages instead of inline English fallbacks.',
+      'A11y: every input and primary button on the new auth pages now meets the 44×44 minimum tap target the design system requires. Form fields and buttons get min-h-[44px] for non-tech-savvy users on mobile.',
+    ],
+    bugFixes: [],
+  },
   {
     version: '2.13.0',
     date: '2026-05-03',
