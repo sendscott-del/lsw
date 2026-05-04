@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.15.3'
+export const APP_VERSION = '2.15.4'
 
 export interface ChangelogEntry {
   version: string
@@ -8,6 +8,14 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.15.4',
+    date: '2026-05-04',
+    enhancements: [],
+    bugFixes: [
+      'Gathered switcher: use the canonical short Magnify and Tidings URLs (magnify-eta.vercel.app and tidings.vercel.app) instead of the longer team-scoped URLs. Same destinations, cleaner links.',
+    ],
+  },
   {
     version: '2.15.3',
     date: '2026-05-04',
