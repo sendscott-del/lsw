@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { ChevronLeft } from 'lucide-react'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
+import { fetchTidingsUsers, type TidingsUser } from '@/lib/gatherTidingsClient'
 
 const APPS = ['magnify', 'steward', 'glean', 'tidings', 'knit'] as const
 type AppName = typeof APPS[number]
@@ -43,6 +44,8 @@ export default function GatherAdminPage() {
   const [busyId, setBusyId] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [filter, setFilter] = useState('')
+  const [tidingsUsers, setTidingsUsers] = useState<TidingsUser[] | null>(null)
+  const [tidingsLoading, setTidingsLoading] = useState(false)
 
   const refresh = useCallback(async () => {
     setLoading(true)
@@ -70,6 +73,17 @@ export default function GatherAdminPage() {
   useEffect(() => {
     if (isSuperAdmin) void refresh()
   }, [isSuperAdmin, refresh])
+
+  // Fetch Tidings users separately — they live in a different Supabase
+  // project, so they don't show up in gather_app_users.
+  useEffect(() => {
+    if (!isSuperAdmin) return
+    setTidingsLoading(true)
+    void fetchTidingsUsers().then((rows) => {
+      setTidingsUsers(rows)
+      setTidingsLoading(false)
+    })
+  }, [isSuperAdmin])
 
   async function toggleApp(target: GatherAppUser, app: AppName) {
     setBusyId(target.user_id)
@@ -269,6 +283,60 @@ export default function GatherAdminPage() {
           Super admins (Stake President, Stake Clerk) can see every user and grant or revoke
           access to any app. Their own super-admin status only changes via this screen.
         </p>
+
+        {/* Tidings users (separate Supabase project) */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                <span style={{ display: 'inline-flex', width: 18, height: 18, borderRadius: 5, backgroundColor: '#F59E0B', color: 'white', fontWeight: 800, fontSize: 10, alignItems: 'center', justifyContent: 'center' }} aria-hidden="true">T</span>
+                Tidings users
+              </h2>
+              <p className="text-xs text-gray-500">
+                Tidings runs on a separate Supabase project. Add / edit / remove inside Tidings.
+              </p>
+            </div>
+            <a
+              href="https://tidings-sendscott-dels-projects.vercel.app/admin"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-medium text-amber-600 hover:underline"
+            >
+              Manage in Tidings ↗
+            </a>
+          </div>
+          {tidingsLoading ? (
+            <p className="px-4 py-6 text-center text-gray-400 text-sm">Loading…</p>
+          ) : tidingsUsers === null ? (
+            <p className="px-4 py-6 text-center text-gray-400 text-sm">
+              Tidings cross-project access not configured. Set
+              {' '}<code className="text-xs">NEXT_PUBLIC_GATHER_TIDINGS_SUPABASE_ANON_KEY</code> in Vercel to enable.
+            </p>
+          ) : tidingsUsers.length === 0 ? (
+            <p className="px-4 py-6 text-center text-gray-400 text-sm">No Tidings users.</p>
+          ) : (
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 text-gray-600">
+                <tr>
+                  <th className="text-left px-4 py-2 font-semibold">Email</th>
+                  <th className="text-left px-4 py-2 font-semibold">Name</th>
+                  <th className="text-left px-4 py-2 font-semibold">Role</th>
+                  <th className="text-left px-4 py-2 font-semibold">Ward</th>
+                </tr>
+              </thead>
+              <tbody>
+                {tidingsUsers.map((u) => (
+                  <tr key={u.id} className="border-t border-gray-100">
+                    <td className="px-4 py-2 text-gray-900 truncate">{u.email}</td>
+                    <td className="px-4 py-2 text-gray-700">{u.full_name ?? '—'}</td>
+                    <td className="px-4 py-2 text-gray-700 capitalize">{u.role ?? '—'}</td>
+                    <td className="px-4 py-2 text-gray-700">{u.ward ?? '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
       </div>
     </div>
   )
