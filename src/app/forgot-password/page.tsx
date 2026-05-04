@@ -43,7 +43,7 @@ export default function ForgotPasswordPage() {
       </div>
 
       <div className="px-4 -mt-12 pb-10">
-        <div className="max-w-sm mx-auto bg-white rounded-2xl shadow-lg p-6">
+        <div className="max-w-sm mx-auto bg-white rounded-md shadow-lg p-6">
           {sent ? (
             <div className="space-y-4">
               <p className="text-sm text-gray-700">{t('auth.resetSent')}</p>
@@ -67,7 +67,7 @@ export default function ForgotPasswordPage() {
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-steward-primary focus:border-transparent min-h-[44px]"
+                  className="w-full px-3 py-2 border-[1.5px] border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-steward-primary focus:border-transparent min-h-[44px]"
                   placeholder={t('auth.emailPlaceholder')}
                 />
               </div>
@@ -75,7 +75,7 @@ export default function ForgotPasswordPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2.5 bg-steward-primary text-white rounded-lg text-sm font-medium hover:bg-steward-primary-dark disabled:opacity-50 min-h-[44px]"
+                className="w-full py-2.5 bg-steward-primary text-white rounded-md text-sm font-medium hover:bg-steward-primary-dark disabled:opacity-50 min-h-[44px]"
               >
                 {loading ? t('auth.sending') : t('auth.sendResetLink')}
               </button>

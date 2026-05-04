@@ -43,6 +43,30 @@
   --color-tidings-primary:      #F59E0B;
   --color-tidings-primary-dark: #D97706;
   --color-tidings-chrome:       #1E293B;
+  /* Glean: warm gold for primary actions (the harvest motif), navy chrome */
+  --color-glean-primary:        #C9A84C;
+  --color-glean-primary-dark:   #A8893B;
+  --color-glean-chrome:         #1B3A6B;
+  --color-glean-fade:            #FFF8E7;
+
+  /* ---- Gathered AppSwitcher chrome ---- */
+  --color-switcher-chrome:      #1e1b4b;
+
+  /* ---- Glean plan status colors ---- */
+  --color-status-none:     #9CA3AF;
+  --color-status-draft:    #6B7280;
+  --color-status-pending:  #F59E0B;
+  --color-status-approved: #10B981;
+  --color-status-expiring: #F97316;
+  --color-status-expired:  #EF4444;
+
+  /* ---- Glean resource categories ---- */
+  --color-cat-food:          #F59E0B;
+  --color-cat-housing:       #3B82F6;
+  --color-cat-employment:    #10B981;
+  --color-cat-mental-health: #8B5CF6;
+  --color-cat-utilities:     #14B8A6;
+  --color-cat-education:     #EC4899;
 
   /* ---- Neutrals ---- */
   --color-gray-50:  #F9FAFB;

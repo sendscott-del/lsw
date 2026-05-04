@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.15.1'
+export const APP_VERSION = '2.15.2'
 
 export interface ChangelogEntry {
   version: string
@@ -8,6 +8,14 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.15.2',
+    date: '2026-05-04',
+    enhancements: [
+      'Visual consistency (Wave 6): all login/forgot/reset inputs now use 1.5px borders and min-h-[44px] tap targets. Auth cards and primary buttons use the canonical 10px radius (rounded-md). Glean status and category tokens added to tokens.css for cross-app parity. AppSwitcher chrome color moved to --color-switcher-chrome token.',
+    ],
+    bugFixes: [],
+  },
   {
     version: '2.15.1',
     date: '2026-05-03',
