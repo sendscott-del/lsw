@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.15.0'
+export const APP_VERSION = '2.15.1'
 
 export interface ChangelogEntry {
   version: string
@@ -8,6 +8,14 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.15.1',
+    date: '2026-05-03',
+    enhancements: [],
+    bugFixes: [
+      'Gathered switcher: tapping another app in the dropdown now navigates the current tab instead of opening a new browser tab. Previously each switch left a tab behind, so hopping between Magnify → Steward → Glean → Knit accumulated tabs. Now it replaces the page in place — much cleaner. (Also fixed an RLS infinite-recursion bug on the shared user_apps + gather_super_admins tables that was silently breaking the switcher\'s read query — the bar wasn\'t showing any apps even when access was correctly granted.)',
+    ],
+  },
   {
     version: '2.15.0',
     date: '2026-05-03',
