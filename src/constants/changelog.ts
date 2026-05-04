@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.15.4'
+export const APP_VERSION = '2.16.0'
 
 export interface ChangelogEntry {
   version: string
@@ -8,6 +8,14 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.16.0',
+    date: '2026-05-04',
+    enhancements: [
+      'Per-app brand stripe: a 3px steward-primary blue strip now sits at the bottom of the app header, picking up the same blue used in the Gathered switcher\'s "S" chip. The brand identity now follows you into the app instead of stopping at the chip in the top bar. Suite navy chrome is preserved so the family feel stays intact.',
+    ],
+    bugFixes: [],
+  },
   {
     version: '2.15.4',
     date: '2026-05-04',

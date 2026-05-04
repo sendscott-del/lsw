@@ -42,8 +42,11 @@ export default function AppShell({ children, activeTab, onTabChange }: AppShellP
   return (
     <div className="min-h-screen flex flex-col pb-16">
       <AppSwitcher />
-      {/* Header */}
-      <header className="sticky top-0 z-30 bg-white border-b border-gray-200 px-4 py-2.5 flex items-center justify-between gap-3">
+      {/* Header. The 3px steward-primary stripe at the bottom is the
+          per-app brand cue — it picks up the same blue used in the
+          Gathered switcher's "S" chip so the brand identity follows
+          you into the app instead of stopping at the chip. */}
+      <header className="sticky top-0 z-30 bg-white border-b-[3px] border-steward-primary px-4 py-2.5 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
           <StewardLogo size={32} />
           <div className="min-w-0">
