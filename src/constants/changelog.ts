@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.14.0'
+export const APP_VERSION = '2.15.0'
 
 export interface ChangelogEntry {
   version: string
@@ -8,6 +8,14 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.15.0',
+    date: '2026-05-03',
+    enhancements: [
+      'Tidings users now surface on /admin/gather. The screen pulls them from a new gather_tidings_users SECURITY DEFINER RPC on the Tidings Supabase project (Tidings runs on a separate project from the other four apps), so super admins can finally see who has Tidings access without hopping apps. Add / edit / remove still happens inside Tidings via a "Manage in Tidings ↗" link — cross-project writes would need additional plumbing. Requires NEXT_PUBLIC_GATHER_TIDINGS_SUPABASE_ANON_KEY in Vercel; falls back to a "not configured" notice if missing.',
+    ],
+    bugFixes: [],
+  },
   {
     version: '2.14.0',
     date: '2026-05-03',
