@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.15.2'
+export const APP_VERSION = '2.15.3'
 
 export interface ChangelogEntry {
   version: string
@@ -8,6 +8,16 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.15.3',
+    date: '2026-05-04',
+    enhancements: [
+      'Gather admin: Tidings users section upgraded from read-only to full CRUD. Super-admins can now add users (email, name, role, ward) via an inline modal, change role and ward inline per row, and remove users — all backed by the new gather_tidings_grant/update/revoke_user RPCs on the Tidings Supabase project. List refreshes after every mutation.',
+    ],
+    bugFixes: [
+      'Admin/gather page marked force-dynamic to prevent Next.js from attempting static prerender without Supabase env vars.',
+    ],
+  },
   {
     version: '2.15.2',
     date: '2026-05-04',
