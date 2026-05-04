@@ -77,7 +77,7 @@ export default function LoginPage() {
 
       {/* Form card overlapping the hero */}
       <div className="px-4 -mt-12 pb-10">
-        <div className="max-w-sm mx-auto bg-white rounded-2xl shadow-lg p-6">
+        <div className="max-w-sm mx-auto bg-white rounded-md shadow-lg p-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
@@ -89,7 +89,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-steward-primary focus:border-transparent"
+                className="w-full px-3 py-2 border-[1.5px] border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-steward-primary focus:border-transparent min-h-[44px]"
                 placeholder={t('auth.emailPlaceholder')}
               />
             </div>
@@ -105,7 +105,7 @@ export default function LoginPage() {
                 onChange={e => setPassword(e.target.value)}
                 required
                 minLength={6}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-steward-primary focus:border-transparent"
+                className="w-full px-3 py-2 border-[1.5px] border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-steward-primary focus:border-transparent min-h-[44px]"
                 placeholder={t('auth.passwordPlaceholder')}
               />
             </div>
@@ -116,7 +116,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 bg-steward-primary text-white rounded-lg text-sm font-medium hover:bg-steward-primary-dark disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-2.5 bg-steward-primary text-white rounded-md text-sm font-medium hover:bg-steward-primary-dark disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
             >
               {loading ? t('auth.loading') : isSignUp ? t('auth.signUp') : t('auth.signIn')}
             </button>
