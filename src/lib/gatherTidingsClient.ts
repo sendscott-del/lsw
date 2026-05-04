@@ -41,3 +41,53 @@ export async function fetchTidingsUsers(): Promise<TidingsUser[] | null> {
   if (!Array.isArray(data)) return null
   return data as TidingsUser[]
 }
+
+export async function grantTidingsUser(
+  email: string,
+  fullName: string | null,
+  role: string,
+  ward: string | null,
+): Promise<string | null> {
+  if (!gatherTidingsClient) return null
+  const { data, error } = await gatherTidingsClient.rpc('gather_tidings_grant_user', {
+    p_email: email,
+    p_full_name: fullName,
+    p_role: role,
+    p_ward: ward,
+  })
+  if (error) {
+    console.warn('[gather] grantTidingsUser error:', error.message)
+    return null
+  }
+  return data as string
+}
+
+export async function updateTidingsUser(
+  id: string,
+  role: string | null,
+  ward: string | null,
+): Promise<boolean> {
+  if (!gatherTidingsClient) return false
+  const { error } = await gatherTidingsClient.rpc('gather_tidings_update_user', {
+    p_id: id,
+    p_role: role,
+    p_ward: ward,
+  })
+  if (error) {
+    console.warn('[gather] updateTidingsUser error:', error.message)
+    return false
+  }
+  return true
+}
+
+export async function revokeTidingsUser(id: string): Promise<boolean> {
+  if (!gatherTidingsClient) return false
+  const { error } = await gatherTidingsClient.rpc('gather_tidings_revoke_user', {
+    p_id: id,
+  })
+  if (error) {
+    console.warn('[gather] revokeTidingsUser error:', error.message)
+    return false
+  }
+  return true
+}
