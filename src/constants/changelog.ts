@@ -1,4 +1,4 @@
-export const APP_VERSION = '2.16.0'
+export const APP_VERSION = '2.16.1'
 
 export interface ChangelogEntry {
   version: string
@@ -8,6 +8,14 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '2.16.1',
+    date: '2026-05-04',
+    enhancements: [],
+    bugFixes: [
+      'Gathered switcher: Tidings URL corrected from tidings.vercel.app (someone else\'s project) to glad-tidings.vercel.app (the actual Tidings deployment).',
+    ],
+  },
   {
     version: '2.16.0',
     date: '2026-05-04',
